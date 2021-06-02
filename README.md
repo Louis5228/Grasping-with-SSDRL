@@ -3,3 +3,11 @@
 This repo is final project for 2021 Deep Learning and Practice class
 
 teacher : 陳永昇、吳毅成、彭文孝
+
+---
+
+## clone repo
+```
+ $ git clone --recursive git@github.com:kuolunwang/Grasping-with-SSDRL.git
+```
+

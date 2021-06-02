@@ -1,0 +1,18 @@
+[submodule "catkin_ws/src/ur5/robotiq"]
+	path = catkin_ws/src/ur5/robotiq
+	url = git@github.com:ros-industrial/robotiq.git
+[submodule "catkin_ws/src/ur5/universal_robot"]
+	path = catkin_ws/src/ur5/universal_robot
+	url = git@github.com:ros-industrial/universal_robot.git
+[submodule "catkin_ws/src/ur5/ur_modern_driver"]
+	path = catkin_ws/src/ur5/ur_modern_driver
+	url = git@github.com:ros-industrial/ur_modern_driver.git
+[submodule "catkin_ws/src/ur5/arm_operation"]
+	path = catkin_ws/src/ur5/arm_operation
+	url = git@github.com:sean85914/arm_operation.git
+[submodule "catkin_ws/src/sensor/apriltags"]
+	path = catkin_ws/src/sensor/apriltags
+	url = git@github.com:RIVeR-Lab/apriltags_ros.git
+[submodule "catkin_ws/src/sensor/realsense-ros"]
+	path = catkin_ws/src/sensor/realsense-ros
+	url = git@github.com:IntelRealSense/realsense-ros.git
