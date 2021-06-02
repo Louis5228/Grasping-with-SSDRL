@@ -27,9 +27,28 @@ cd $current_path/catkin_ws/src/sensor/apriltags
 git checkout $BRANCH
 git pull
 
+
+
 CONFLICTS=$(git ls-files -u | wc -l)
 if [ "$CONFLICTS" -gt 0 ] ; then
    echo "There is conflict in apriltags. Aborting"
+   return 1
+fi
+
+BRANCH=melodic
+
+echo "-----------------------------------------------------------------------"
+echo "-------------------------pull vision_opencv ---------------------------"
+echo "-----------------------------------------------------------------------"
+cd $current_path/catkin_ws/src/sensor/vision_opencv
+git checkout $BRANCH
+git pull
+
+
+
+CONFLICTS=$(git ls-files -u | wc -l)
+if [ "$CONFLICTS" -gt 0 ] ; then
+   echo "There is conflict in vision_opencv. Aborting"
    return 1
 fi
 
