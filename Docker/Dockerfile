@@ -59,6 +59,11 @@ RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -yq dist-upgrade \
     python3-empy  \
     python3-lxml \
     python3-pymodbus \
+    terminator \
+    python-virtualenv \
+    screen \
+    openssh-server \
+    libglfw3-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -175,7 +180,8 @@ RUN pip3 install \
     seaborn \
     easydict \
     lmdb \  
-    shapely 
+    shapely \
+    virtualenv
     
 ##################################### Pytorch ######################################
 
@@ -200,8 +206,11 @@ RUN cd ${HOME} && git clone https://github.com/ARG-NCTU/procman \
     && cmake .. \
     && make install
 
-############################# LoCoBot and PyRobot ############################
-RUN python -m pip install -U pip setuptools
+############################# PyRobot ############################
+
+RUN apt-get update 
+
+RUN python -m pip install -U pip setuptools 
 
 RUN cd ${HOME}/
 
