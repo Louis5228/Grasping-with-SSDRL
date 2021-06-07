@@ -8,7 +8,7 @@ ENV ROS_DISTRO melodic
 ###################################### user #####################################
 
 ENV SHELL=/bin/bash \
-    USER=DLP-project \
+    USER=dlp \
     UID=1000 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8
@@ -126,7 +126,7 @@ RUN rosdep init \
 ##################################### Serial ######################################
 ENV CMAKE_PREFIX_PATH /opt/ros/melodic
 
-RUN cd ${HOME} && git clone git@github.com:wjwwood/serial.git \
+RUN cd ${HOME} && git clone https://github.com/wjwwood/serial.git \
     && cd serial \
     && mkdir build \
     && cd build \
@@ -184,39 +184,17 @@ RUN python3 -m pip install -U pip
 RUN python3 -m pip install \
     torch==1.7.0 torchvision==0.8.1 torchaudio==0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
 
-##################################### PIP2 ######################################
-
-RUN pip2 install --upgrade pip setuptools
-
-RUN pip2 install pyquaternion \
-    lmdb \
-    easydict \
-    colour \
-    shapely 
-
-RUN pip2 install torch==1.4.0 torchvision==0.5.0
-
 ####################################### procman ###########################################
 
-RUN cd ${HOME} && git clone git@github.com:lcm-proj/lcm \
+RUN cd ${HOME} && git clone https://github.com/lcm-proj/lcm \
     && cd lcm \
     && mkdir build \
     && cd build \
     && cmake .. \
     && make install
 
-RUN cd ${HOME} && git clone git@github.com:ARG-NCTU/procman \
+RUN cd ${HOME} && git clone https://github.com/ARG-NCTU/procman \
     && cd procman \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make install
-
-#################################### GTSAM ####################################
-
-RUN cd ${HOME}/ \
-    && git clone git@github.com:borglab/gtsam.git \
-    && cd gtsam/ \
     && mkdir build \
     && cd build \
     && cmake .. \
@@ -227,7 +205,7 @@ RUN python -m pip install -U pip setuptools
 
 RUN cd ${HOME}/
 
-RUN curl 'https://raw.githubusercontent.com/facebookresearch/pyrobot/master/robots/LoCoBot/install/locobot_install_all.sh' > locobot_install_all.sh && chmod +x locobot_install_all.sh
+RUN curl 'https://raw.githubusercontent.com/ARG-NCTU/pyrobot/master/robots/LoCoBot/install/locobot_install_all.sh' > locobot_install_all.sh && chmod +x locobot_install_all.sh
 
 RUN ./locobot_install_all.sh -t sim_only -p 2 -l interbotix
 
@@ -236,7 +214,7 @@ RUN rm locobot_install_all.sh
 ##################################### setting #####################################
 
 RUN chown -R ${USER}:${USER} ${HOME}/
-RUN echo "DLP-project ALL=(ALL)  ALL" > /etc/sudoers
+RUN echo "dlp ALL=(ALL)  ALL" > /etc/sudoers
 
 # Support of nvidia-docker 2.0
 ENV NVIDIA_VISIBLE_DEVICES=all

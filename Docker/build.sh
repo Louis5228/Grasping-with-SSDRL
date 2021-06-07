@@ -1,3 +1,3 @@
   
 #!/bin/sh
-docker build --rm -t kuolunwang/DLP:project .
+docker build --rm -t kuolunwang/dlp:project .

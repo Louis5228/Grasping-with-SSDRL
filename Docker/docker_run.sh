@@ -48,7 +48,7 @@ docker run \
     -e QT_X11_NO_MITSHM=1 \
     -e XAUTHORITY=$XAUTH \
     -v "$XAUTH:$XAUTH" \
-    -v "/home/$USER/Grasping-with-SSDRL:/home/DLP-project/Grasping-with-SSDRL" \
+    -v "/home/$USER/Grasping-with-SSDRL:/home/dlp/Grasping-with-SSDRL" \
     -v "/tmp/.X11-unix:/tmp/.X11-unix" \
     -v "/etc/localtime:/etc/localtime:ro" \
     -v "/dev:/dev" \
@@ -58,5 +58,5 @@ docker run \
     --privileged \
     --security-opt seccomp=unconfined \
     $DOCKER_OPTS \
-    kuolunwang/DLP:project \
+    kuolunwang/dlp:project \
     $BASH_OPTION
