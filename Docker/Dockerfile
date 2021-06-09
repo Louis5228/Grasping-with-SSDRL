@@ -206,20 +206,6 @@ RUN cd ${HOME} && git clone https://github.com/ARG-NCTU/procman \
     && cmake .. \
     && make install
 
-############################# PyRobot ############################
-
-RUN apt-get update 
-
-RUN python -m pip install -U pip setuptools 
-
-RUN cd ${HOME}/
-
-RUN curl 'https://raw.githubusercontent.com/ARG-NCTU/pyrobot/master/robots/LoCoBot/install/locobot_install_all.sh' > locobot_install_all.sh && chmod +x locobot_install_all.sh
-
-RUN ./locobot_install_all.sh -t sim_only -p 2 -l interbotix
-
-RUN rm locobot_install_all.sh
-
 ##################################### setting #####################################
 
 RUN chown -R ${USER}:${USER} ${HOME}/
