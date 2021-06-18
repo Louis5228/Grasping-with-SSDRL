@@ -49,7 +49,6 @@ class Memory:
         
     def update(self, idx, error):
         p = self._get_priority(error)
-        #print("Data index {} priority set from {} to {}".format(idx - self.tree.capacity + 1, self.tree.tree[idx], p))
         self.tree.update(idx, p)
         
     def save_memory(self, root_path, name):

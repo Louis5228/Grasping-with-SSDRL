@@ -6,18 +6,22 @@ import os
 
 class Option():
     def __init__(self):
-        parser = argparse.ArgumentParser(prog="DLP homework 7", description='This lab will implement cgan')
+        parser = argparse.ArgumentParser(prog="DLP final project", description='This project will implement grasp with self supervised deep reinforcement learining')
 
         # training hyper parameters
-        parser.add_argument("--learning_rate", type=float, default=0.0002, help="Learning rate for the trainer, default is 0.0002")
-        parser.add_argument("--epochs", type=int, default=250, help="The number of the training, default is 250")
-        parser.add_argument("--batch_size", type=int, default=32, help="Input batch size for training, default is 32")
-        parser.add_argument("--hidden_size", type=int, default=64, help="The hidden size for model, default is 64")
+        parser.add_argument("--learning_rate", type=float, default=5e-4, help="Learning rate for the trainer, default is 5e-4")
+        parser.add_argument("--epsilon", type=float, default=0.5, help="Probability to choose random action, default is 0.5")
+        parser.add_argument("--buffer_size", type=int, default=1000, help="Experience buffer size, default is 1000") # N
+        parser.add_argument("--learning_freq", type=int, default=5, help="Frequency for updating behavior network, default is 5") # M
+        parser.add_argument("--updating_freq", type=int, default=10, help="Frequency for updating target network, default is 10") # C
+        parser.add_argument("--mini_batch_size", type=int, default=3, help="How many transitions should used for learning, default is 3") # K
+        parser.add_argument("--densenet_lr", type=float, default=1e-4, help="Learning rate for the densenet block, default is 1e-4")
+        parser.add_argument("--save_every", type=int, default=5, help="Every how many update should save the model, default is 5")
+        parser.add_argument("--gripper_memory", type=str, default="")
 
         # save name and load model path
         parser.add_argument("--save_folder", type=str, default=os.getcwd(), help="save model in save folder, default is current path")
-        parser.add_argument("--load_model",  type=str, default=None, help="load model from wandb, ex. 'kuolunwang/DLP_homework7/model:v0', default is None")
-        parser.add_argument("--dataset",  type=str, default="test", help="evaluate dataset(new_test and test), default is test.json")
+        parser.add_argument("--load_model",  type=str, default=None, help="load model from wandb, ex. 'kuolunwang/DLP_final_project/model:v0', default is None")
         parser.add_argument("--test", action="store_true", default=False, help="True is test model, False is keep train, default is False")
 
         # cuda
@@ -31,3 +35,13 @@ class Option():
         args.cuda = not args.no_cuda and torch.cuda.is_available()
         print(args)
         return args 
+
+
+
+
+
+
+
+
+
+
