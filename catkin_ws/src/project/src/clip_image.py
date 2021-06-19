@@ -1,27 +1,49 @@
 #!/usr/bin/env python3
 import rospy
 import cv2
-from sensor_msgs.msg import Image
+import message_filters
+from sensor_msgs.msg import CameraInfo, Image
 from cv_bridge import CvBridge
 
 class clip_image:
     def __init__(self):
-        self.bridge = CvBridge()
+        self.cv_bridge = CvBridge()
+
         ## Subscriber
-        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
-        ## Publisher
-        self.image_pub_r = rospy.Publisher("/clip_image/right", Image, queue_size=10)
-        self.image_pub_l = rospy.Publisher("/clip_image/left", Image, queue_size=10)
+        image_sub = rospy.Subscriber('/camera/color/image_raw', Image, self.rgb_callback)
+        depth_sub = rospy.Subscriber('/camera/aligned_depth_to_color/image_raw', Image, self.depth_callback)
 
-    def image_callback(self, data):
-        cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        ## Publisher for color images
+        self.color_pub_r = rospy.Publisher("/clip_image/color/right", Image, queue_size=10)
+        self.color_pub_l = rospy.Publisher("/clip_image/color/left", Image, queue_size=10)
+        ## Publisher for depth images
+        self.depth_pub_r = rospy.Publisher("/clip_image/depth/right", Image, queue_size=10)
+        self.depth_pub_l = rospy.Publisher("/clip_image/depth/left", Image, queue_size=10)
 
-        ## clip image
-        left_image = cv_image[:, :320, :]
-        right_image = cv_image[:, 320:, :]
+    def rgb_callback(self, data):
+        cv_image = self.cv_bridge.imgmsg_to_cv2(data, "bgr8")
 
-        self.image_pub_l.publish(self.bridge.cv2_to_imgmsg(left_image, "bgr8"))
-        self.image_pub_r.publish(self.bridge.cv2_to_imgmsg(right_image, "bgr8"))
+        ## clip rgb image
+        color_left_image = cv_image[:, :320, :]
+        color_right_image = cv_image[:, 320:, :]
+
+        self.color_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(color_left_image, "bgr8"))
+        self.color_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(color_right_image, "bgr8"))
+
+        ## Visualize images
+        # cv2.imshow("left_Image window", left_image)
+        # cv2.imshow("right_Image window", right_image)
+        # cv2.waitKey(3)
+
+    def depth_callback(self, data):
+        cv_depth = self.cv_bridge.imgmsg_to_cv2(data, "16UC1")
+
+        ## clip depth image
+        d_left_image = cv_depth[:, :320]
+        d_right_image = cv_depth[:, 320:]
+
+        self.depth_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(d_left_image, "16UC1"))
+        self.depth_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(d_right_image, "16UC1"))
 
         ## Visualize images
         # cv2.imshow("left_Image window", left_image)
