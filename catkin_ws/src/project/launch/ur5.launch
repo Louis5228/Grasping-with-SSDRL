@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!--Realsense-->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+
+     <!--Hand-eye callibration-->
+    <node pkg="tf" type="static_transform_publisher" name="arm_d435_static_transform" args="0.422134 0.034468 0.650901 0.718939 -0.001258 -0.695070 0.001770 base_link camera_link 100"/>
+    
+    <!--Ur5-->
+    <include file="$(find arm_operation)/launch/ur5_real.launch">
+            <arg name="robot_ip" default="192.168.50.11" />
+    </include>
+
+    <!--Clip image-->
+    <node pkg="project" type="clip_image.py" name="clip_image" output="screen"/>
+
+    <!--uv2xyz transformation-->
+    <node pkg="project" type="uv2xyz.py" name="uv2xyz" output="screen"/>
+
+    <!---->
+    <node pkg="project" type="ur5_specific_position.py" name="ur5_specific_position" output="screen"/>
+
+    <!--Gripper-->
+    <!--<node name="robotiq2FGripper" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py"  args="/dev/ttyUSB0" required="true"/>-->
+   
+</launch>

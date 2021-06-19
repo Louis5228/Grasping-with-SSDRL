@@ -128,5 +128,20 @@ if [ "$CONFLICTS" -gt 0 ] ; then
    return 1
 fi
 
+BRANCH=0.6.5
+
+echo "-----------------------------------------------------------------------"
+echo "-------------------------pull geometry2  ------------------------------"
+echo "-----------------------------------------------------------------------"
+cd $current_path/catkin_ws/src/sensor/geometry2
+git checkout $BRANCH
+git pull
+
+CONFLICTS=$(git ls-files -u | wc -l)
+if [ "$CONFLICTS" -gt 0 ] ; then
+   echo "There is conflict in geometry2. Aborting"
+   return 1
+fi
+
 cd $current_path
 return 0

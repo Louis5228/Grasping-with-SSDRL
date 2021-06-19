@@ -53,6 +53,7 @@ docker run \
     -v "/etc/localtime:/etc/localtime:ro" \
     -v "/dev:/dev" \
     -v "/var/run/docker.sock:/var/run/docker.sock" \
+    --user "root:root" \
     --name DLP_project \
     --network host \
     --privileged \
