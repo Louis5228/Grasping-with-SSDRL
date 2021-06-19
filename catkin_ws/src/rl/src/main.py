@@ -229,7 +229,6 @@ if __name__ == '__main__':
                     wandb.log({"reward": result})
                     wandb.log({"loss mean": np.mean(loss_list)})
 
-
                 ################################TRAIN################################
                 # Start training after buffer has sufficient experiences
                 if gripper_memory_buffer.length   > args.mini_batch_size:
