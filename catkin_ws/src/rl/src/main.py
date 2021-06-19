@@ -18,6 +18,9 @@ import rospkg
 import itertools
 import wandb
 
+# Define transition tuple
+Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 'next_color', 'next_depth', 'is_empty'])
+
 class setup():
     def __init__(self):
 
@@ -31,6 +34,17 @@ def shutdown_process(gri_mem, regular=True):
     if regular: print "Regular shutdown"
     else: print "Shutdown since user interrupt"
     sys.exit(0)
+
+def sample_data(memory, batch_size):
+	done = False
+	mini_batch = []; idxs = []; is_weight = []
+	while not done:
+		success = True
+		mini_batch, idxs, is_weight = memory.sample(batch_size)
+		for transition in mini_batch:
+			success = success and isinstance(transition, Transition)
+		if success: done = True
+	return mini_batch, idxs, is_weight
 
 if __name__ == '__main__':
 
@@ -59,9 +73,6 @@ if __name__ == '__main__':
     config.densenet_lr = args.densenet_lr
     config.save_every = args.save_every
     config.gripper_memory = args.gripper_memory
-
-    # Define transition tuple
-    Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 'next_color', 'next_depth', 'is_empty'])
 
     gripper_memory_buffer = Memory(arg.buffer_size)
 
@@ -207,7 +218,7 @@ if __name__ == '__main__':
                 else:
                     is_empty == False
 
-                current_reward = utils.reward_judgement(reward, is_valid, action_success)
+                current_reward = utils.reward_judgement(reward=5, is_valid, action_success)
 
                 log.write_csv("reward", "reward", current_reward)
                 log.write_csv("valid", "valid", is_valid)
@@ -242,7 +253,7 @@ if __name__ == '__main__':
                         old_q = []
                         td_target_list = []
                         
-                        _mini_batch, _idxs, _is_weight = utils.sample_data(gripper_memory_buffer, args.mini_batch_size)
+                        _mini_batch, _idxs, _is_weight = sample_data(gripper_memory_buffer, args.mini_batch_size)
                         mini_batch += _mini_batch
                         idxs += _idxs
                         is_weight += list(_is_weight)
