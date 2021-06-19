@@ -12,6 +12,8 @@ class Logger():
 
         self.log_path = os.path.join(cur_path, "Log")
         self.pic_path = os.path.join(cur_path, "Result")
+        self.color = os.path.join(self.pic_path, "Color")
+        self.depth = os.path.join(self.pic_path, "Depth")
 
         # create folder
         if not os.path.exists(self.log_path):
@@ -19,6 +21,15 @@ class Logger():
 
         if not os.path.exists(self.pic_path):
             os.makedirs(self.pic_path)
+
+        if not os.path.exists(self.color):
+            os.makedirs(self.color)
+
+        if not os.path.exists(self.depth):
+            os.makedirs(self.depth)
+
+    def getlog_path(self):
+        return self.pic_path, self.color, self.depth
 
     def vis_affordance(self, prediction):
         tmp = np.copy(prediction)

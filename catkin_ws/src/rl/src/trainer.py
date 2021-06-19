@@ -13,7 +13,7 @@ from scipy import ndimage
 from PIL import Image
 from torchvision import transforms
 
-from model import reinforcement_net
+from model.network import reinforcement_net
 
 def tensor_to_PIL(tensor):
     image = tensor.cpu().clone()
@@ -38,7 +38,6 @@ class Trainer():
             self.criterion = self.criterion.cuda()
             print("using cuda")
 
-        self.reward = 5
         self.discount_factor = 0.5
 
         # Set model to train mode
@@ -124,11 +123,11 @@ class Trainer():
         if is_volatile == False:
             return output_prob.cpu().detach().numpy()[:, 0, lower:upper, lower:upper] # only one array
 
-        for rotate_idx in range(len(output_prob)-2):
+        for rotate_idx in range(len(output_prob)):
             if rotate_idx == 0:
-                grasp_prediction = output_prob[2+rotate_idx].cpu().detach().numpy()[:, 0, lower:upper, lower:upper]
+                grasp_prediction = output_prob[rotate_idx].cpu().detach().numpy()[:, 0, lower:upper, lower:upper]
             else:
-                grasp_prediction = np.concatenate((grasp_prediction, output_prob[2+rotate_idx].cpu().detach().numpy()[:, 0, lower:upper, lower:upper]))
+                grasp_prediction = np.concatenate((grasp_prediction, output_prob[rotate_idx].cpu().detach().numpy()[:, 0, lower:upper, lower:upper]))
         return grasp_prediction
         
     # Get TD target given reward and next state

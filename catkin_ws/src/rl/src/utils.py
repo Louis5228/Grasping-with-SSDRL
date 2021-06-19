@@ -3,13 +3,28 @@
 import numpy as np
 import cv2
 
+def wrap_strings(image_path, depth_path, iteration):
+	color_name = image_path + "color_{:06}.jpg".format(iteration)
+	next_color_name = image_path + "next_color_{:06}.jpg".format(iteration)
+	depth_name = depth_path + "depth_data_{:06}.npy".format(iteration)
+	next_depth_name = depth_path + "next_depth_data_{:06}.npy".format(iteration) # for saving space of hard disk
+	return color_name, depth_name, next_color_name, next_depth_name
+
 def check_if_valid(position, workspace):
-	if (position[0] > workspace[0] and position[0] < workspace[1]) and \
-	   (position[1] > workspace[2] and position[1] < workspace[3]) and \
-	   (position[2] > workspace[4] and position[2] < workspace[5]):
-	   return True # valid
-	else: 
+    if (position[0] > workspace[0] and position[0] < workspace[1]) and \
+       (position[1] > workspace[2] and position[1] < workspace[3]) and \
+       (position[2] > workspace[4] and position[2] < workspace[5]):
+       return True # valid
+    else: 
         return False # invalid
+
+def reward_judgement(reward, is_valid, action_success):
+    if not action_valid:
+        return -3*reward_unit # Invalid
+    if action_success:
+        return reward_unit # Valid and success
+    else:
+        return -reward_unit # Valid and failed
 
 # Choose action using epsilon-greedy policy
 def epsilon_greedy_policy(epsilon, grasp_prediction):
