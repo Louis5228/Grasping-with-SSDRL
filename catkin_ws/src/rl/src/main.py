@@ -4,7 +4,7 @@ from option import Option
 from trainer import Trainer
 from utils.prioritized_memory import Memory
 from utils.logger import Logger
-import utils
+import utils.utils as utils
 
 import time
 import os
@@ -17,6 +17,17 @@ import rospy
 import rospkg
 import itertools
 import wandb
+from cv_bridge import CvBridge
+from torchvision import transforms
+from collections import namedtuple
+
+# srv and msg
+from sensor_msgs.msg import Image
+from arm_operation.srv import *
+from arm_operation.msg import *
+from project.srv import *
+from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest, Empty
+
 
 # Define transition tuple
 Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 'next_color', 'next_depth', 'is_empty'])
@@ -24,15 +35,83 @@ Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 
 class setup():
     def __init__(self):
 
-        # rosservice and rostopic
+        # rosservice for ur5 endeffector
+        self.go_home = rospy.ServiceProxy("/joint_move/home", Trigger)
+        self.go_right_tote = rospy.ServiceProxy("/joint_move/right_tote", Trigger)
+        self.go_left_tote = rospy.ServiceProxy("/joint_move/left_tote", Trigger)
+        self.uvtrans = rospy.ServiceProxy("/uv2xyz", uvTransform)
 
-        # go home
+        # rosservice for gripper
+        self.close = rospy.ServiceProxy("/robotiq_finger_control_node/close_gripper", Empty)
+        self.open = rospy.ServiceProxy("/robotiq_finger_control_node/open_gripper", Empty)
+        self.is_grasped = rospy.ServiceProxy("/robotiq_finger_control_node/get_grasp_state", Trigger)
+
+        self.initial()
+
+    def initial(self):
+
+        req = TriggerRequest()
+        _ = self.go_home(req)
+
+        rospy.sleep(0.1)
+
+        self.open()
+
+        rospy.sleep(0.1)
+
+        rospy.loginfo("Already to use")
+    
+    def grasp_object(self, u, v, angle, is_right):
+
+        req_trans = uvTransformRequest()
+        req_trans.u = u
+        req_trans.v = v
+        req_trans.angle = angle
+
+        _ = self.uvtrans(req_trans)
+
+        rospy.sleep(0.1)
+
+        self.close()
+
+        rospy.sleep(0.1)
+
+        req = TriggerRequest()
+        _ = self.go_right_tote(req) if is_right else self.go_left_tote(req)
+
+        rospy.sleep(0.1)
+
+        _ = self.go_home(req)
+
+        rospy.loginfo("Finish grasp")
+        
+    def check_grasped(self):
+
+        req = TriggerRequest()
+        res = self.is_grasped(req)
+        return res.success
+
+    def place_object(self, is_right):
+
+        req = TriggerRequest()
+        _ = self.go_right_tote(req) if is_right else self.go_left_tote(req)
+
+        rospy.sleep(0.1)
+
+        self.open()
+
+        rospy.sleep(0.1)
+
+        req = TriggerRequest()
+        _ = self.go_home(req)
+
+        rospy.loginfo("Finish placeing")
 
 def shutdown_process(gri_mem, regular=True):
 
     gri_mem.save_memory(path, "gripper_memory.pkl")
-    if regular: print "Regular shutdown"
-    else: print "Shutdown since user interrupt"
+    if regular: print("Regular shutdown")
+    else: print("Shutdown since user interrupt")
     sys.exit(0)
 
 def sample_data(memory, batch_size):
@@ -47,6 +126,10 @@ def sample_data(memory, batch_size):
 	return mini_batch, idxs, is_weight
 
 if __name__ == '__main__':
+
+    rospy.init_node('rl_train_node', anonymous=True)
+
+    cv_bridge = CvBridge()
 
     # setup ros
     Setup = setup()
@@ -74,15 +157,15 @@ if __name__ == '__main__':
     config.save_every = args.save_every
     config.gripper_memory = args.gripper_memory
 
-    gripper_memory_buffer = Memory(arg.buffer_size)
+    gripper_memory_buffer = Memory(args.buffer_size)
 
     program_ts = time.time()
     program_time = 0.0
 
-    if gripper_memory!="":
-        gripper_memory_buffer.load_memory(gripper_memory)
+    if args.gripper_memory!="":
+        gripper_memory_buffer.load_memory(args.gripper_memory)
 
-    cv2.nemedwindow("prediction")
+    cv2.namedWindow("prediction")
     is_right = True
     episode = 0
     sufficient_exp = 0
@@ -93,16 +176,16 @@ if __name__ == '__main__':
         objects = 5
         episode += 1
         program_time += time.time()-program_ts
-        cmd = raw_input("\033[1;34m[%f] Reset environment, if ready, press 's' to start. 'e' to exit: \033[0m" %(program_time))
+        cmd = input("\033[1;34m[%f] Reset environment, if ready, press 's' to start. 'e' to exit: \033[0m" %(program_time))
         program_ts = time.time()
 
         '''
         workspace in right and left tote
         '''
-        # if is_right:
-        #     workspace = 
-        # else
-        #     workspace = 
+        if is_right:
+            workspace = [120, 220, 120, 350]
+        else:
+            workspace = [420, 520, 120, 350]
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(package_path, gripper_memory_buffer, True)
@@ -124,12 +207,24 @@ if __name__ == '__main__':
                 '''
                 need input color and depth
                 '''
-                # if(is_right == True):
-                #     color = 
-                #     depth = 
-                # else:
-                #     color = 
-                #     depth = 
+                if is_right:
+                    color = rospy.wait_for_message("/clip_image/color/right", Image)
+                    depth = rospy.wait_for_message("/clip_image/depth/right", Image)
+                else:
+                    color = rospy.wait_for_message("/clip_image/color/left", Image)
+                    depth = rospy.wait_for_message("/clip_image/depth/left", Image)
+
+                # size -> (320 * 320)
+                color = cv_bridge.imgmsg_to_cv2(color, "bgr8")
+                depth = cv_bridge.imgmsg_to_cv2(depth, "16UC1")
+
+                cv2.imshow("img", color)
+
+                depth_array = np.array(depth, dtype=np.float32)
+                depth_array = depth_array.astype(np.uint16)
+                cv2.imshow("depth_img.png", depth_array)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
 
                 grasp_prediction = trainer.forward(color, depth, is_volatile=True)
                 print("Forward past: {} seconds".format(time.time()-ts))
@@ -159,10 +254,10 @@ if __name__ == '__main__':
                 # Save (color heightmap + prediction heatmap + motion primitive and corresponding position), then show it
                 visual_img = log.draw_image(mixed_imgs[pixel_index[0]], pixel_index, episode, iteration)
                 cv2.imshow("prediction", cv2.resize(visual_img, None, fx=2, fy=2))
-                cv2.waitKey(33)
+                cv2.waitKey(0)
 
                 # Check if action valid (is NAN?)
-                is_valid = utils.check_if_valid(points[pixel_index[1], pixel_index[2]], workspace)
+                is_valid = utils.check_if_valid(pixel_index[1], pixel_index[2], workspace)
 
                 # Visualize in RViz
                 # _viz(points[pixel_index[1], pixel_index[2]], action, angle, is_valid)
@@ -187,29 +282,31 @@ if __name__ == '__main__':
                     go to next tote and go home
                     '''
                     if(is_right == True):
+                        pass
                         # go to left tote
                     else:
+                        pass
                         # go to rigth tote
-                    go_home()
+                    # go_home()
                     objects -= 1
 
                 else: 
-    
-                    go_home()
+                    pass
+                    # go_home()
 
-                time.sleep(1.0) 
+                rospy.sleep(0.1) 
                
                 # Get next images, and check if workspace is empty
 
                 '''
                 need input color and depth
                 '''
-                if(is_right == True):
-                    next_color = 
-                    next_depth = 
-                else:
-                    next_color = 
-                    next_depth = 
+                # if(is_right == True):
+                #     next_color = 
+                #     next_depth = 
+                # else:
+                #     next_color = 
+                #     next_depth = 
                 
                 # check the tote empty?
                 # is_empty = _check_if_empty(next_pc.pc)
@@ -218,7 +315,7 @@ if __name__ == '__main__':
                 else:
                     is_empty == False
 
-                current_reward = utils.reward_judgement(reward=5, is_valid, action_success)
+                current_reward = utils.reward_judgement(5, is_valid, action_success)
 
                 log.write_csv("reward", "reward", current_reward)
                 log.write_csv("valid", "valid", is_valid)

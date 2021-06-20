@@ -64,7 +64,7 @@ def epsilon_greedy_policy(epsilon, grasp_prediction):
         out_str += "Select grasp with angle {} at ({}, {}) with Q value {:.3f}\n".format(angle, x, y, grasp_prediction[primitive, x, y])
 
         pixel_index = [primitive, x, y]
-    print out_str
+    print(out_str)
     return action, pixel_index, angle
 
 # Choose action using greedy policy

@@ -28,7 +28,7 @@ class Logger():
         if not os.path.exists(self.depth):
             os.makedirs(self.depth)
 
-    def getlog_path(self):
+    def get_path(self):
         return self.pic_path, self.color, self.depth
 
     def vis_affordance(self, prediction):
