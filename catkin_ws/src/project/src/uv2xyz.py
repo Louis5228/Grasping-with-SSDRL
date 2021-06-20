@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rospy
 import cv2
 import tf
@@ -37,13 +38,11 @@ class uv2xyz():
 
         cv_image = self.cv_bridge.imgmsg_to_cv2(rgb_msg, "bgr8")
         cv_depth = self.cv_bridge.imgmsg_to_cv2(depth_msg, "16UC1")
-        # print(cv_depth)
-        zc = cv_depth[req.v, req.u]
+        zc = cv_depth[req.v-20, req.u]
         zc = float(zc)/1000. # 1000. for D435
-        rx, ry, rz = self.getXYZ(req.u/1.0 , req.v, zc/1.0)
+        rx, ry, rz = self.getXYZ(req.u/1.0 , req.v - 20, zc/1.0)
 
         q = tf.transformations.quaternion_from_euler( -90.0 * math.pi/180, 90.0 * math.pi/180, req.angle * math.pi/180, axes="rxzx")
-        # q = [-0.5, 0.5, 0.5, 0.5]
 
         t = [rx, ry, rz]
         print(t)
@@ -61,10 +60,8 @@ class uv2xyz():
         res = uvTransformResponse()
 
         try:
-        # rospy.wait_for_service(self.mani_ee_srv)
             mani_resp = self.mani_move_srv(self.mani_req)
             rospy.sleep(0.1)
-            # rospy.wait_for_service(self.mani_ee_srv)
             self.mani_req.target_pose.position.z = pose[2] - 0.05
             mani_resp = self.mani_move_srv(self.mani_req)
             res.result = "success"

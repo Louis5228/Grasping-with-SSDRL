@@ -10,6 +10,9 @@
     <include file="$(find arm_operation)/launch/ur5_real.launch">
             <arg name="robot_ip" default="192.168.50.11" />
     </include>
+    
+    <!--Gripper-->
+    <node name="robotiq2FGripper" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py"  args="/dev/ttyUSB0" required="true"/>
 
     <!--Clip image-->
     <node pkg="project" type="clip_image.py" name="clip_image" output="screen"/>
@@ -17,10 +20,13 @@
     <!--uv2xyz transformation-->
     <node pkg="project" type="uv2xyz.py" name="uv2xyz" output="screen"/>
 
-    <!---->
+    <!--ur5 endeffector move-->
     <node pkg="project" type="ur5_specific_position.py" name="ur5_specific_position" output="screen"/>
 
-    <!--Gripper-->
-    <!--<node name="robotiq2FGripper" pkg="robotiq_2f_gripper_control" type="Robotiq2FGripperRtuNode.py"  args="/dev/ttyUSB0" required="true"/>-->
-   
+    <!-- robotiq gripper control -->
+    <node pkg="project" type="robotiq_gripper_control" name="robotiq_finger_control_node" output="screen">
+        <param name="upper_thres" value="222"/>
+        <param name="lower_thres" value="10"/>
+    </node>
+
 </launch>

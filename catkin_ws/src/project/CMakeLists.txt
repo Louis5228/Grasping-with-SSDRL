@@ -124,6 +124,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(robotiq_gripper_control src/robotiq_gripper_control.cpp)
+add_dependencies(robotiq_gripper_control ${catkin_EXPORTED_TARGETS} robotiq_2f_gripper_control_gencpp)
+target_link_libraries(robotiq_gripper_control ${catkin_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/project.cpp

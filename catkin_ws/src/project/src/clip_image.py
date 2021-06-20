@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rospy
 import cv2
 import message_filters
@@ -30,11 +31,6 @@ class clip_image:
         self.color_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(color_left_image, "bgr8"))
         self.color_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(color_right_image, "bgr8"))
 
-        ## Visualize images
-        # cv2.imshow("left_Image window", left_image)
-        # cv2.imshow("right_Image window", right_image)
-        # cv2.waitKey(3)
-
     def depth_callback(self, data):
         cv_depth = self.cv_bridge.imgmsg_to_cv2(data, "16UC1")
 
@@ -44,11 +40,6 @@ class clip_image:
 
         self.depth_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(d_left_image, "16UC1"))
         self.depth_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(d_right_image, "16UC1"))
-
-        ## Visualize images
-        # cv2.imshow("left_Image window", left_image)
-        # cv2.imshow("right_Image window", right_image)
-        # cv2.waitKey(3)
 
 if __name__ == '__main__':
     rospy.init_node('clip_image', anonymous=True)

@@ -23,7 +23,8 @@ teacher : 陳永昇、吳毅成、彭文孝
 ## How to run
 ```
     $ cd Docker && source docker_run.sh
-    Docker $ cd Grasping-with-SSDRL && source environment.sh
+    Docker $ cd Grasping-with-SSDRL && source catkin_make.sh
+    Docker $ source environment.sh
 ```
 
 ## If you want to enter same container
