@@ -1,0 +1,21 @@
+group "00_calibration" {   
+    cmd "01_realsense_camera" {
+        exec = "roslaunch realsense2_camera rs_rgbd.launch";
+        host = "localhost";
+    }
+}
+
+group "01_DLP_project" {   
+    cmd "01_ur5_setup" {
+        exec = "roslaunch project ur5.launch";
+        host = "localhost";
+    }
+    cmd "02_Rviz" {
+        exec = "rviz -d rviz/rviz.rviz";
+        host = "localhost";
+    }
+}
+
+script "start_project" {
+
+}
