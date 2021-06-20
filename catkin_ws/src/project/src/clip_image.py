@@ -25,8 +25,8 @@ class clip_image:
         cv_image = self.cv_bridge.imgmsg_to_cv2(data, "bgr8")
 
         ## clip rgb image
-        color_left_image = cv_image[:, :320, :]
-        color_right_image = cv_image[:, 320:, :]
+        color_right_image = cv_image[100:420, :320, :]
+        color_left_image = cv_image[100:420, 320:, :]
 
         self.color_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(color_left_image, "bgr8"))
         self.color_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(color_right_image, "bgr8"))
@@ -35,8 +35,8 @@ class clip_image:
         cv_depth = self.cv_bridge.imgmsg_to_cv2(data, "16UC1")
 
         ## clip depth image
-        d_left_image = cv_depth[:, :320]
-        d_right_image = cv_depth[:, 320:]
+        d_left_image = cv_depth[80:400, :320]
+        d_right_image = cv_depth[80:400, 320:]
 
         self.depth_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(d_left_image, "16UC1"))
         self.depth_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(d_right_image, "16UC1"))
