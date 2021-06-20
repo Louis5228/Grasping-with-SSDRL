@@ -181,6 +181,7 @@ RUN pip3 install \
     easydict \
     lmdb \  
     shapely \
+    wandb \
     virtualenv
     
 ##################################### Pytorch ######################################
