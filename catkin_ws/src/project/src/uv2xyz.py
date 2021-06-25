@@ -38,16 +38,16 @@ class uv2xyz():
 
         cv_image = self.cv_bridge.imgmsg_to_cv2(rgb_msg, "bgr8")
         cv_depth = self.cv_bridge.imgmsg_to_cv2(depth_msg, "16UC1")
-        zc = cv_depth[req.v-20, req.u]
+        zc = cv_depth[(req.v - 20), req.u]
         zc = float(zc)/1000. # 1000. for D435
-        rx, ry, rz = self.getXYZ(req.u/1.0 , req.v - 20, zc/1.0)
+        rx, ry, rz = self.getXYZ(req.u/1.0 , req.v/1.0 - 20., zc/1.0)
 
         q = tf.transformations.quaternion_from_euler( -90.0 * math.pi/180, 90.0 * math.pi/180, req.angle * math.pi/180, axes="rxzx")
 
         t = [rx, ry, rz]
-        print(t)
+        # print(t)
         pose = self.transform_pose_to_base_link(t, q)
-        print(pose)
+        # print(pose)
 
         self.mani_req.target_pose.position.x = pose[0]
         self.mani_req.target_pose.position.y = pose[1]

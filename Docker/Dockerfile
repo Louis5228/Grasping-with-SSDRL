@@ -182,7 +182,7 @@ RUN pip3 install \
     lmdb \  
     shapely \
     wandb \
-    virtualenv
+    virtualenv 
     
 ##################################### Pytorch ######################################
 

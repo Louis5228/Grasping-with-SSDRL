@@ -99,9 +99,6 @@ class Trainer():
         input_depth_img.shape = (input_depth_img.shape[0], input_depth_img.shape[1], input_depth_img.shape[2], 1)
         input_color_data = torch.from_numpy(input_color_img.astype(np.float32)).permute(3, 2, 0, 1)
         input_depth_data = torch.from_numpy(input_depth_img.astype(np.float32)).permute(3, 2, 0, 1)
-        
-        tensor_to_PIL(input_color_data).save("color_tensor.jpg")
-        tensor_to_PIL(input_depth_data).save("depth_tensor.jpg")
 
         return input_color_data, input_depth_data, padding_width
 
@@ -141,8 +138,6 @@ class Trainer():
         '''
         # Use behavior net to find best action in next state
         next_grasp_prediction = self.forward(next_color, next_depth, is_volatile = True)
-
-        # New block added in 3/19
 
         tmp = np.where(next_grasp_prediction==np.max(next_grasp_prediction))
         next_best_pixel = [tmp[0][0], tmp[1][0], tmp[2][0]]

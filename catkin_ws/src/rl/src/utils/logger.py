@@ -6,14 +6,17 @@ import cv2
 import numpy as np
 
 class Logger():
-    def __init__(self):
+    def __init__(self, episode):
 
         cur_path = os.getcwd()
 
-        self.log_path = os.path.join(cur_path, "Log")
-        self.pic_path = os.path.join(cur_path, "Result")
+        self.log_path = os.path.join(cur_path, "Log", "{:04}".format(episode))
+        self.pic_path = os.path.join(cur_path, "Result", "{:04}".format(episode))
+        self.action = os.path.join(self.pic_path, "Action")
         self.color = os.path.join(self.pic_path, "Color")
         self.depth = os.path.join(self.pic_path, "Depth")
+        self.heatmap = os.path.join(self.pic_path, "heatmap")
+        self.mix = os.path.join(self.pic_path, "mix")
 
         # create folder
         if not os.path.exists(self.log_path):
@@ -27,6 +30,15 @@ class Logger():
 
         if not os.path.exists(self.depth):
             os.makedirs(self.depth)
+
+        if not os.path.exists(self.heatmap):
+            os.makedirs(self.heatmap)
+        
+        if not os.path.exists(self.mix):
+            os.makedirs(self.mix)
+
+        if not os.path.exists(self.action):
+            os.makedirs(self.action)
 
     def get_path(self):
         return self.pic_path, self.color, self.depth
@@ -42,7 +54,7 @@ class Logger():
         heatmap = cv2.applyColorMap(tmp, cv2.COLORMAP_JET)
         return heatmap
 
-    def draw_image(image, pixel_index, episode, iteration):
+    def draw_image(self, image, pixel_index, iteration, explore):
         '''
         pixel_index[0] == 0: grasp, -90
         pixel_index[0] == 1: grasp, -45
@@ -51,6 +63,10 @@ class Logger():
         '''
         center = (pixel_index[2], pixel_index[1])
 
+        if explore: 
+            color = (0, 0, 255) # Red for exploring
+        else: 
+            color = (0, 0, 0) # Black for exploiting
 
         rotate_idx = pixel_index[0] - 2
         theta = np.radians(-90.0+45.0*rotate_idx)
@@ -72,29 +88,22 @@ class Logger():
         result = cv2.line(result, p11, p12, color, 2)
         result = cv2.line(result, p21, p22, color, 2)
 
-        img_name = os.path.join(self.pic_path, "action_e{0:02}_i{1:04}.jpg".format(episode, iteration))
+        img_name = os.path.join(self.action, "action_{:04}.jpg".format(iteration))
 
-        cv2.imwrite(image_name, result)
+        cv2.imwrite(img_name, result)
         return result
 
-    def save_heatmap_and_mixed(self, prediction, color, iteration, episode):
-        heatmaps   = []
-        mixed_imgs = []
-        for grasp_prediction in prediction:
-            heatmaps.append(self.vis_affordance(grasp_prediction))
-        for heatmap_idx in range(len(heatmaps)):
-            img_name = os.path.join(self.pic_path, "heatmap_e{0:02}_i{1:04}.jpg".format(episode, iteration))
-            cv2.imwrite(img_name, heatmaps[heatmap_idx])
-            img_name = os.path.join(self.pic_path, "mix_e{0:02}_i{1:04}.jpg".format(episode, iteration))
-            mixed = cv2.addWeighted(color, 1.0, heatmaps[heatmap_idx], 0.4, 0)
-            mixed_imgs.append(mixed)
-            cv2.imwrite(img_name, mixed)
-        return heatmaps, mixed_imgs
+    def save_heatmap_and_mixed(self, prediction, color, iteration):
+        heatmaps = self.vis_affordance(prediction)
+        img_name = os.path.join(self.heatmap, "heatmap_{:04}.jpg".format(iteration))
+        cv2.imwrite(img_name, heatmaps)
+        img_name = os.path.join(self.mix, "mix_{:04}.jpg".format(iteration))
+        mixed = cv2.addWeighted(color, 1.0, heatmaps, 0.4, 0)
+        cv2.imwrite(img_name, mixed)
+        return heatmaps, mixed
 
-    def write_csv(self, file_name, title, data):
+    def write_csv(self, file_name, data):
 
-        with open(os.path.join(self.log_path, file_name + '.csv'), 'w', newline='') as csvfile:
+        with open(os.path.join(self.log_path, file_name + '.csv'), 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
-
-            writer.writerow([title])
             writer.writerow([data])

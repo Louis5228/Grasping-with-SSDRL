@@ -48,6 +48,15 @@ class setup():
 
         self.initial()
 
+        # self.grasp_object(200, 200, 45, True)
+
+        # if self.check_grasped():
+        #     print("grasped object")
+        # else:
+        #     print("trash")
+
+        # self.place_object(True)
+
     def initial(self):
 
         req = TriggerRequest()
@@ -94,13 +103,13 @@ class setup():
     def place_object(self, is_right):
 
         req = TriggerRequest()
-        _ = self.go_right_tote(req) if is_right else self.go_left_tote(req)
+        _ = self.go_left_tote(req) if is_right else self.go_right_tote(req)
 
         rospy.sleep(0.1)
 
         self.open()
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         req = TriggerRequest()
         _ = self.go_home(req)
@@ -136,10 +145,6 @@ if __name__ == '__main__':
 
     # paramters
     args = Option().create()
-
-    # Logger
-    log = Logger()
-    log_path, color_path, depth_path = log.get_path()
 
     run = wandb.init(project="DLP_final_project", entity="kuolunwang")
     config = wandb.config
@@ -179,11 +184,15 @@ if __name__ == '__main__':
         cmd = input("\033[1;34m[%f] Reset environment, if ready, press 's' to start. 'e' to exit: \033[0m" %(program_time))
         program_ts = time.time()
 
+        # Logger
+        log = Logger(episode)
+        log_path, color_path, depth_path = log.get_path()
+
         '''
         workspace in right and left tote
         '''
         if is_right:
-            workspace = [120, 220, 120, 350]
+            workspace = [120, 220, 100, 350]
         else:
             workspace = [420, 520, 120, 350]
 
@@ -218,46 +227,44 @@ if __name__ == '__main__':
                 color = cv_bridge.imgmsg_to_cv2(color, "bgr8")
                 depth = cv_bridge.imgmsg_to_cv2(depth, "16UC1")
 
-                cv2.imshow("img", color)
-
-                depth_array = np.array(depth, dtype=np.float32)
-                depth_array = depth_array.astype(np.uint16)
-                cv2.imshow("depth_img.png", depth_array)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+                depth = np.array(depth) / 1000.0
+                # cv2.imshow("depth_img.png", depth_array)
+                # cv2.imshow("color.png",color)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
 
                 grasp_prediction = trainer.forward(color, depth, is_volatile=True)
                 print("Forward past: {} seconds".format(time.time()-ts))
 
-                heatmaps, mixed_imgs = log.save_heatmap_and_mixed(grasp_prediction, color, iteration, episode)
-
                 # SELECT ACTION
                 if not args.test: # Train
-                    action, pixel_index, angle = utils.epsilon_greedy_policy(epsilon_, grasp_prediction)
+                    action, pixel_index, angle, explore = utils.epsilon_greedy_policy(epsilon_, grasp_prediction)
                 else: # Testing
                     action, pixel_index, angle = utils.greedy_policy(grasp_prediction)
+                    explore = False
+                
+                log.write_csv("action_primitive", action)
+                log.write_csv("angle", angle)
+                log.write_csv("pixel", (pixel_index[1], pixel_index[2]))
+
+                heatmaps, mixed_imgs = log.save_heatmap_and_mixed(grasp_prediction[pixel_index[0]], color, iteration)
                 
                 del grasp_prediction
-
-                log.write_csv("action_primitive", "action_primitive", action)
-                log.write_csv("angle", "angle", angle)
-                log.write_csv("pixel", "pixel", (pixel_index[1], pixel_index[2]))
-
                 '''
                 transform real x,y,z with u,v
                 '''
                 #real_x, real_y, real_z 
 
                 # utils.print_action(action_str, pixel_index, points[pixel_index[1], pixel_index[2]])
-                print("Take action primitive {} with angle {%d} at ({%d}, {%d}) -> ({%d}, {%d}, {%d})".format(action, angle, pixel_index[1], pixel_index[2], real_x, real_y, real_z ))
+                # print("Take action primitive {} with angle {%d} at ({%d}, {%d}) -> ({%d}, {%d}, {%d})".format(action, angle, pixel_index[1], pixel_index[2], real_x, real_y, real_z ))
 
                 # Save (color heightmap + prediction heatmap + motion primitive and corresponding position), then show it
-                visual_img = log.draw_image(mixed_imgs[pixel_index[0]], pixel_index, episode, iteration)
+                visual_img = log.draw_image(mixed_imgs, pixel_index, iteration, explore)
                 cv2.imshow("prediction", cv2.resize(visual_img, None, fx=2, fy=2))
                 cv2.waitKey(0)
 
                 # Check if action valid (is NAN?)
-                is_valid = utils.check_if_valid(pixel_index[1], pixel_index[2], workspace)
+                is_valid = utils.check_if_valid(pixel_index[1:3], workspace, is_right)
 
                 # Visualize in RViz
                 # _viz(points[pixel_index[1], pixel_index[2]], action, angle, is_valid)
@@ -268,10 +275,14 @@ if __name__ == '__main__':
                     '''
                     take action
                     '''
+                    print("ACTION is_valid!!!!!!!!")
+                    print(pixel_index[2], pixel_index[1])
+                    Setup.grasp_object(pixel_index[2], pixel_index[1] + 90, (int)(angle / 3.14 * 180.0) + 90, is_right)
 
-                    '''
-                    make sure action success
-                    '''
+                    # '''
+                    # make sure action success
+                    # '''
+                    action_success = Setup.check_grasped()
 
                 else: # invalid
 
@@ -281,18 +292,12 @@ if __name__ == '__main__':
                     '''
                     go to next tote and go home
                     '''
-                    if(is_right == True):
-                        pass
-                        # go to left tote
-                    else:
-                        pass
-                        # go to rigth tote
-                    # go_home()
+                    Setup.place_object(is_right)
                     objects -= 1
 
                 else: 
-                    pass
-                    # go_home()
+
+                    Setup.initial()
 
                 rospy.sleep(0.1) 
                
@@ -301,15 +306,20 @@ if __name__ == '__main__':
                 '''
                 need input color and depth
                 '''
-                # if(is_right == True):
-                #     next_color = 
-                #     next_depth = 
-                # else:
-                #     next_color = 
-                #     next_depth = 
+                if is_right:
+                    next_color = rospy.wait_for_message("/clip_image/color/right", Image)
+                    next_depth = rospy.wait_for_message("/clip_image/depth/right", Image)
+                else:
+                    next_color = rospy.wait_for_message("/clip_image/color/left", Image)
+                    next_depth = rospy.wait_for_message("/clip_image/depth/left", Image)
+
+                # size -> (320 * 320)
+                next_color = cv_bridge.imgmsg_to_cv2(next_color, "bgr8")
+                next_depth = cv_bridge.imgmsg_to_cv2(next_depth, "16UC1")
+
+                next_depth = np.array(next_depth) / 1000.0
                 
                 # check the tote empty?
-                # is_empty = _check_if_empty(next_pc.pc)
                 if(objects == 0):
                     is_empty == True
                 else:
@@ -317,15 +327,20 @@ if __name__ == '__main__':
 
                 current_reward = utils.reward_judgement(5, is_valid, action_success)
 
-                log.write_csv("reward", "reward", current_reward)
-                log.write_csv("valid", "valid", is_valid)
-                log.write_csv("success", "success", action_success)
+                log.write_csv("reward", current_reward)
+                log.write_csv("valid", is_valid)
+                log.write_csv("success", action_success)
 
                 result += current_reward * np.power(0.5, iteration)
 
                 print("\033[1;33mCurrent reward: {} \t Return: {}\033[0m".format(current_reward, result))
                 # Store transition to experience buffer
                 color_name, depth_name, next_color_name, next_depth_name = utils.wrap_strings(color_path, depth_path, iteration)
+                # save color and depth
+                cv2.imwrite(color_name, color)
+                cv2.imwrite(next_color_name, next_color)
+                np.save(depth_name, depth)
+                np.save(next_depth_name, next_depth)
                 transition = Transition(color_name, depth_name, pixel_index, current_reward, next_color_name, next_depth_name, is_empty)
 
                 gripper_memory_buffer.add(transition)
