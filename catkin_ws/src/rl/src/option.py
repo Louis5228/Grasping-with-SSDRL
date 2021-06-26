@@ -14,7 +14,7 @@ class Option():
         parser.add_argument("--buffer_size", type=int, default=1000, help="Experience buffer size, default is 1000") # N
         parser.add_argument("--learning_freq", type=int, default=5, help="Frequency for updating behavior network, default is 5") # M
         parser.add_argument("--updating_freq", type=int, default=10, help="Frequency for updating target network, default is 10") # C
-        parser.add_argument("--mini_batch_size", type=int, default=3, help="How many transitions should used for learning, default is 3") # K
+        parser.add_argument("--mini_batch_size", type=int, default=2, help="How many transitions should used for learning, default is 3") # K
         parser.add_argument("--densenet_lr", type=float, default=1e-4, help="Learning rate for the densenet block, default is 1e-4")
         parser.add_argument("--save_every", type=int, default=5, help="Every how many update should save the model, default is 5")
         parser.add_argument("--gripper_memory", type=str, default="")

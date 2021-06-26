@@ -62,11 +62,11 @@ class setup():
         req = TriggerRequest()
         _ = self.go_home(req)
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         self.open()
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         rospy.loginfo("Already to use")
     
@@ -79,16 +79,16 @@ class setup():
 
         _ = self.uvtrans(req_trans)
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         self.close()
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         req = TriggerRequest()
         _ = self.go_right_tote(req) if is_right else self.go_left_tote(req)
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         _ = self.go_home(req)
 
@@ -105,7 +105,7 @@ class setup():
         req = TriggerRequest()
         _ = self.go_left_tote(req) if is_right else self.go_right_tote(req)
 
-        rospy.sleep(0.1)
+        rospy.sleep(0.2)
 
         self.open()
 
@@ -299,7 +299,7 @@ if __name__ == '__main__':
 
                     Setup.initial()
 
-                rospy.sleep(0.1) 
+                rospy.sleep(0.2) 
                
                 # Get next images, and check if workspace is empty
 
@@ -379,9 +379,9 @@ if __name__ == '__main__':
 
                             rotate_idx = pixel_index[0]
                             old_q.append(trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]])
-                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty, pixel_index[0])
+                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
                             td_target_list.append(td_target)
-                            loss_ = trainer.backprop(color, depth, pixel_index, td_target, is_weight[i], mini_batch_size, i==0, i==len(mini_batch)-1)
+                            loss_ = trainer.backprop(color, depth, pixel_index, td_target, is_weight[i], args.mini_batch_size, i==0, i==len(mini_batch)-1)
                             loss_list.append(loss_)
                             
 
@@ -393,7 +393,7 @@ if __name__ == '__main__':
                             pixel_index = mini_batch[i].pixel_idx
                             next_color = cv2.imread(mini_batch[i].next_color)
                             next_depth = np.load(mini_batch[i].next_depth)
-                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty, pixel_index[0])
+                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
                             rotate_idx = pixel_index[0]
                             old_value = trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]]
 
@@ -405,7 +405,7 @@ if __name__ == '__main__':
                         back_t = time.time()-back_ts
 
 
-                        print("Backpropagation& Updating: {} seconds \t|\t Avg. {} seconds".format(back_t, back_t/(mini_batch_size)))
+                        print("Backpropagation& Updating: {} seconds \t|\t Avg. {} seconds".format(back_t, back_t/(args.mini_batch_size)))
 
                         if learned_times % args.updating_freq == 0:
                             print("[%f] Replace target network to behavior network" %(program_time+time.time()-program_ts))

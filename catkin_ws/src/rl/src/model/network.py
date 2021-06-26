@@ -63,6 +63,8 @@ class reinforcement_net(nn.Module):
           ('grasp-norm2', nn.BatchNorm2d(1)),
           ("grasp-upsample1", nn.Upsample(scale_factor = 4, mode="bilinear"))
         ]))
+
+        self.output_prob = None
         
     def forward(self, input_color_data, input_depth_data, is_volatile = False, specific_rotation = -1, clear_grad = False):
         if is_volatile: # For choosing action
@@ -83,7 +85,7 @@ class reinforcement_net(nn.Module):
             return output_prob
 
         else: # For backpropagation, or computing TD target
-            output_prob = None
+            self.output_prob = None
             if self.use_cuda:
                 input_color_data = input_color_data.cuda()
                 input_depth_data = input_depth_data.cuda()
@@ -97,6 +99,6 @@ class reinforcement_net(nn.Module):
                 interm_color_feat_rotated.detach()
                 interm_depth_feat_rotated.detach()
             interm_feat_rotated = torch.cat((interm_color_feat_rotated, interm_depth_feat_rotated), dim=1)
-            output_prob = rotate_featuremap(self.grasp_net(interm_feat_rotated), -theta, self.use_cuda)
+            self.output_prob = rotate_featuremap(self.grasp_net(interm_feat_rotated), -theta, self.use_cuda)
 
-            return output_prob
+            return self.output_prob

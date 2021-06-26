@@ -106,6 +106,7 @@ class Trainer():
     def forward(self, color_img, depth_img, is_volatile = False, specific_rotation=-1, network = "behavior", clear_grad = False):
 
         input_color_data, input_depth_data, padding_width = self.preprocessing(color_img, depth_img)
+        print(input_color_data.shape)
         # Pass input data to model
         if network == "behavior":
             output_prob = self.behavior_net.forward(input_color_data, input_depth_data, \
@@ -156,10 +157,10 @@ class Trainer():
     # Do backwardpropagation
     def backprop(self, color_img, depth_img, action_pix_idx, label_value, is_weight, batch_size, first = False, update=False):
 
-        label = np.zeros((1, 320, 320))
-        label[0, action_pix_idx[1]+48, action_pix_idx[2]+48] = label_value # Extra padding
-        label_weight = np.zeros((1, 320, 320))
-        label_weight[0, action_pix_idx[1]+48, action_pix_idx[2]+48] = 1 # Extra padding
+        label = np.zeros((1, 928, 928))
+        label[0, action_pix_idx[1]+72, action_pix_idx[2]+72] = label_value # Extra padding
+        label_weight = np.zeros((1, 928, 928))
+        label_weight[0, action_pix_idx[1]+72, action_pix_idx[2]+72] = 1 # Extra padding
         if first: self.optimizer.zero_grad()
         loss_value = 0.0
         out_str = "({}, {}, {})| TD Target: {:.3f}\t Weight: {:.3f}\t".format(action_pix_idx[0], action_pix_idx[1], action_pix_idx[2], label_value, is_weight)
@@ -174,13 +175,13 @@ class Trainer():
         rotation = action_pix_idx[0]
         prediction = self.forward(color_img, depth_img, is_volatile = False, specific_rotation = rotation, network = "behavior", clear_grad = False)
         out_str += "Q: {:.3f}\t".format(prediction[0, action_pix_idx[1], action_pix_idx[2]])
-        if self.use_cuda:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float().cuda()))* \
+        if self.args.cuda:
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 928, 928), Variable(torch.from_numpy(label).float().cuda()))* \
                                 Variable(torch.from_numpy(label_weight).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float().cuda(), requires_grad = False)
         else:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 928, 928), Variable(torch.from_numpy(label).float()))* \
                                 Variable(torch.from_numpy(label_weight).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float(), requires_grad = False)
@@ -191,13 +192,13 @@ class Trainer():
         rotation += 4
         prediction = self.forward(color_img, depth_img, is_volatile = False, specific_rotation = rotation, network = "behavior", clear_grad = False)
         out_str += "Q (symmetric): {:.3f}\t".format(prediction[0, action_pix_idx[1], action_pix_idx[2]])
-        if self.use_cuda:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float().cuda()))* \
+        if self.args.cuda:
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 928, 928), Variable(torch.from_numpy(label).float().cuda()))* \
                                 Variable(torch.from_numpy(label_weight).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float().cuda(), requires_grad = False)
         else:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 928, 928), Variable(torch.from_numpy(label).float()))* \
                                 Variable(torch.from_numpy(label_weight).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float(), requires_grad = False)
