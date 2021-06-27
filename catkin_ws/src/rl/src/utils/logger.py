@@ -12,6 +12,7 @@ class Logger():
 
         self.log_path = os.path.join(cur_path, "Log", "{:04}".format(episode))
         self.pic_path = os.path.join(cur_path, "Result", "{:04}".format(episode))
+        self.weight_path = os.path.join(self.log_path, "Weight")
         self.action = os.path.join(self.pic_path, "Action")
         self.color = os.path.join(self.pic_path, "Color")
         self.depth = os.path.join(self.pic_path, "Depth")
@@ -40,8 +41,11 @@ class Logger():
         if not os.path.exists(self.action):
             os.makedirs(self.action)
 
+        if not os.path.exists(self.weight_path):
+            os.makedirs(self.weight_path)
+
     def get_path(self):
-        return self.log_path, self.color, self.depth
+        return self.log_path, self.color, self.depth, self.weight_path
 
     def vis_affordance(self, prediction):
         tmp = np.copy(prediction)

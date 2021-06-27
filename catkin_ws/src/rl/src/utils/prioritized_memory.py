@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import os 
 import random
 import pickle
 from .sumtree import SumTree
@@ -52,7 +53,7 @@ class Memory:
         self.tree.update(idx, p)
         
     def save_memory(self, root_path, name):
-        f = open(root_path+name, 'wb')
+        f = open(os.path.join(root_path, name), 'wb')
         pickle.dump(self.tree, f)
         f.close()
     

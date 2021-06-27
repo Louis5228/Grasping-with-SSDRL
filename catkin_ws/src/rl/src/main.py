@@ -188,15 +188,15 @@ if __name__ == '__main__':
 
         # Logger
         log = Logger(episode)
-        log_path, color_path, depth_path = log.get_path()
+        log_path, color_path, depth_path, weight_path = log.get_path()
 
         '''
         workspace in right and left tote
         '''
         if is_right:
-            workspace = [120, 220, 150, 360]
+            workspace = [120, 220, 100, 350]
         else:
-            workspace = [400, 500, 150, 360]
+            workspace = [420, 520, 100, 350]
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(log_path, gripper_memory_buffer, True)
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                     color = rospy.wait_for_message("/clip_image/color/left", Image)
                     depth = rospy.wait_for_message("/clip_image/depth/left", Image)
 
-                # size -> (320 * 320)
+                # size -> (224*224)
                 color = cv_bridge.imgmsg_to_cv2(color, "bgr8")
                 depth = cv_bridge.imgmsg_to_cv2(depth, "16UC1")
 
@@ -277,8 +277,6 @@ if __name__ == '__main__':
                     '''
                     take action
                     '''
-                    print("ACTION is_valid!!!!!!!!")
-                    print(pixel_index[2], pixel_index[1])
                     Setup.grasp_object(pixel_index[2], pixel_index[1], (int)(angle / 3.14 * 180.0) + 90, is_right)
 
                     # '''
@@ -416,6 +414,6 @@ if __name__ == '__main__':
                                 print("[%f] Replace target network to behavior network" %(program_time+time.time()-program_ts))
                                 trainer.target_net.load_state_dict(trainer.behavior_net.state_dict())
                             if learned_times % args.save_every == 0:
-                                model_name = model_path + "behavior_e{}_i{}.pth".format(episode, iteration)
+                                model_name = weight_path + "behavior_e{}_i{}.pth".format(episode, iteration)
                                 torch.save(trainer.behavior_net.state_dict(), model_name)
                                 print("[%f] Model: %s saved" %(program_time+time.time()-program_ts, model_name))

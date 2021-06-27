@@ -105,7 +105,6 @@ class Trainer():
     def forward(self, color_img, depth_img, is_volatile = False, specific_rotation=-1, network = "behavior", clear_grad = False):
 
         input_color_data, input_depth_data, padding_width = self.preprocessing(color_img, depth_img)
-        print(input_color_data.shape)
         # Pass input data to model
         if network == "behavior":
             output_prob = self.behavior_net.forward(input_color_data, input_depth_data, \
