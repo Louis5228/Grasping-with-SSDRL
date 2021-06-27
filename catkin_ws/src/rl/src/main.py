@@ -28,7 +28,6 @@ from arm_operation.msg import *
 from project.srv import *
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest, Empty
 
-
 # Define transition tuple
 Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 'next_color', 'next_depth', 'is_empty'])
 
@@ -118,7 +117,7 @@ class setup():
 
 def shutdown_process(path, gri_mem, regular=True):
 
-    gri_mem.save_memory(path, "gripper_memory.pkl")
+    gri_mem.save_memory(os.path.join(path, "gripper_memory.pkl"))
     if regular: print("Regular shutdown")
     else: print("Shutdown since user interrupt")
     sys.exit(0)
@@ -198,7 +197,7 @@ if __name__ == '__main__':
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(log_path, gripper_memory_buffer, True)
-            cv2.destroyWindow("prediction")
+            # cv2.destroyWindow("prediction")
 
         elif cmd == 'S' or cmd == 's': # Start
 
@@ -354,6 +353,7 @@ if __name__ == '__main__':
 
                 if iteration == args.size_lim:
                     is_empty = True
+                    shutdown_process(log_path, gripper_memory_buffer, True)
 
                 if not args.record:
                     ################################TRAIN################################
