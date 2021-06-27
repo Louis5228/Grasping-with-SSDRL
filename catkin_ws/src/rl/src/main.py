@@ -124,15 +124,15 @@ def shutdown_process(gri_mem, regular=True):
     sys.exit(0)
 
 def sample_data(memory, batch_size):
-	done = False
-	mini_batch = []; idxs = []; is_weight = []
-	while not done:
-		success = True
-		mini_batch, idxs, is_weight = memory.sample(batch_size)
-		for transition in mini_batch:
-			success = success and isinstance(transition, Transition)
-		if success: done = True
-	return mini_batch, idxs, is_weight
+    done = False
+    mini_batch = []; idxs = []; is_weight = []
+    while not done:
+        success = True
+        mini_batch, idxs, is_weight = memory.sample(batch_size)
+        for transition in mini_batch:
+            success = success and isinstance(transition, Transition)
+        if success: done = True
+    return mini_batch, idxs, is_weight
 
 if __name__ == '__main__':
 
@@ -357,7 +357,7 @@ if __name__ == '__main__':
                 if gripper_memory_buffer.length   > args.mini_batch_size:
                     sufficient_exp+=1
                     if (sufficient_exp-1) % args.learning_freq == 0:
-                        back_ts = time.time(); 
+                        back_ts = time.time()
                         learned_times += 1
                         mini_batch = []
                         idxs = []
@@ -383,7 +383,6 @@ if __name__ == '__main__':
                             td_target_list.append(td_target)
                             loss_ = trainer.backprop(color, depth, pixel_index, td_target, is_weight[i], args.mini_batch_size, i==0, i==len(mini_batch)-1)
                             loss_list.append(loss_)
-                            
 
                         # After parameter updated, update prioirites tree
                         for i in range(len(mini_batch)):
@@ -404,14 +403,13 @@ if __name__ == '__main__':
 
                         back_t = time.time()-back_ts
 
-
                         print("Backpropagation& Updating: {} seconds \t|\t Avg. {} seconds".format(back_t, back_t/(args.mini_batch_size)))
 
                         if learned_times % args.updating_freq == 0:
                             print("[%f] Replace target network to behavior network" %(program_time+time.time()-program_ts))
                             trainer.target_net.load_state_dict(trainer.behavior_net.state_dict())
                         if learned_times % args.save_every == 0:
-                            model_name = model_path + "e{}_i{}.pth".format(episode, iteration)
+                            model_name = model_path + "behavior_e{}_i{}.pth".format(episode, iteration)
                             torch.save(trainer.behavior_net.state_dict(), model_name)
                             print("[%f] Model: %s saved" %(program_time+time.time()-program_ts, model_name))
 
