@@ -156,10 +156,10 @@ class Trainer():
     # Do backwardpropagation
     def backprop(self, color_img, depth_img, action_pix_idx, label_value, is_weight, batch_size, first = False, update=False):
 
-        label = np.zeros((1, 800, 800))
-        label[0, action_pix_idx[1]+80, action_pix_idx[2]+80] = label_value # Extra padding
-        label_weight = np.zeros((1, 800, 800))
-        label_weight[0, action_pix_idx[1]+80, action_pix_idx[2]+80] = 1 # Extra padding
+        label = np.zeros((1, 320, 320))
+        label[0, action_pix_idx[1]+48, action_pix_idx[2]+48] = label_value # Extra padding
+        label_weight = np.zeros((1, 320, 320))
+        label_weight[0, action_pix_idx[1]+48, action_pix_idx[2]+48] = 1 # Extra padding
         if first: self.optimizer.zero_grad()
         loss_value = 0.0
         out_str = "({}, {}, {})| TD Target: {:.3f}\t Weight: {:.3f}\t".format(action_pix_idx[0], action_pix_idx[1], action_pix_idx[2], label_value, is_weight)
@@ -175,12 +175,12 @@ class Trainer():
         prediction = self.forward(color_img, depth_img, is_volatile = False, specific_rotation = rotation, network = "behavior", clear_grad = False)
         out_str += "Q: {:.3f}\t".format(prediction[0, action_pix_idx[1], action_pix_idx[2]])
         if self.args.cuda:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 800, 800), Variable(torch.from_numpy(label).float().cuda()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float().cuda()))* \
                                 Variable(torch.from_numpy(label_weight).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float().cuda(), requires_grad = False)
         else:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 800, 800), Variable(torch.from_numpy(label).float()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float()))* \
                                 Variable(torch.from_numpy(label_weight).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float(), requires_grad = False)
@@ -192,12 +192,12 @@ class Trainer():
         prediction = self.forward(color_img, depth_img, is_volatile = False, specific_rotation = rotation, network = "behavior", clear_grad = False)
         out_str += "Q (symmetric): {:.3f}\t".format(prediction[0, action_pix_idx[1], action_pix_idx[2]])
         if self.args.cuda:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 800, 800), Variable(torch.from_numpy(label).float().cuda()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float().cuda()))* \
                                 Variable(torch.from_numpy(label_weight).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float().cuda(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float().cuda(), requires_grad = False)
         else:
-            loss = self.criterion(self.behavior_net.output_prob.view(1, 800, 800), Variable(torch.from_numpy(label).float()))* \
+            loss = self.criterion(self.behavior_net.output_prob.view(1, 320, 320), Variable(torch.from_numpy(label).float()))* \
                                 Variable(torch.from_numpy(label_weight).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([is_weight])).float(), requires_grad = False)* \
                                 Variable(torch.from_numpy(np.array([1./batch_size])).float(), requires_grad = False)

@@ -20,6 +20,7 @@ class Option():
         parser.add_argument("--gripper_memory", type=str, default="")
         parser.add_argument("--record", action="store_true", default=False, help="collect data for replay buffer")
         parser.add_argument("--size_lim", type=int, default=20, help="The times of collect data")
+        parser.add_argument("--episode", type=int, default=0, help="From the episode start training, default is 0")
 
         # save name and load model path
         parser.add_argument("--save_folder", type=str, default=os.getcwd(), help="save model in save folder, default is current path")

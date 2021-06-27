@@ -12,12 +12,15 @@ def wrap_strings(image_path, depth_path, iteration):
 	return color_name, depth_name, next_color_name, next_depth_name
 
 def check_if_valid(position, workspace, is_right):
-    if is_right is not True:
-        position[0] += 320
-
-    if (position[0] + 90 >= workspace[2] and position[0] + 90 <= workspace[3]) and \
+    if is_right:
+        position[1] += 60
+    else:
+        position[1] += 340
+    print(workspace)
+    print(position[0] + 128, position[1])
+    if (position[0] + 128 >= workspace[2] and position[0] + 128 <= workspace[3]) and \
        (position[1] >= workspace[0] and position[1] <= workspace[1]):
-       return True # valid
+        return True # valid
     else: 
         return False # invalid
 

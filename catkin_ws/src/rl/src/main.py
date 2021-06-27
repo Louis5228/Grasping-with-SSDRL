@@ -72,8 +72,11 @@ class setup():
     def grasp_object(self, u, v, angle, is_right):
 
         req_trans = uvTransformRequest()
-        req_trans.u = u
-        req_trans.v = v
+        if is_right:
+            req_trans.u = u + 60
+        else :
+            req_trans.u = u + 340
+        req_trans.v = v + 128    
         req_trans.angle = angle
 
         _ = self.uvtrans(req_trans)
@@ -117,7 +120,7 @@ class setup():
 
 def shutdown_process(path, gri_mem, regular=True):
 
-    gri_mem.save_memory(os.path.join(path, "gripper_memory.pkl"))
+    gri_mem.save_memory(path, "gripper_memory.pkl")
     if regular: print("Regular shutdown")
     else: print("Shutdown since user interrupt")
     sys.exit(0)
@@ -170,14 +173,14 @@ if __name__ == '__main__':
         gripper_memory_buffer.load_memory(args.gripper_memory)
 
     cv2.namedWindow("prediction")
+    episode = args.episode
     is_right = True
-    episode = 0
     sufficient_exp = 0
     learned_times = 0
     loss_list = []
 
     while True:
-        objects = 5
+        objects = 3
         episode += 1
         program_time += time.time()-program_ts
         cmd = input("\033[1;34m[%f] Reset environment, if ready, press 's' to start. 'e' to exit: \033[0m" %(program_time))
@@ -193,7 +196,7 @@ if __name__ == '__main__':
         if is_right:
             workspace = [120, 220, 100, 350]
         else:
-            workspace = [420, 520, 120, 350]
+            workspace = [420, 520, 100, 350]
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(log_path, gripper_memory_buffer, True)
@@ -276,7 +279,7 @@ if __name__ == '__main__':
                     '''
                     print("ACTION is_valid!!!!!!!!")
                     print(pixel_index[2], pixel_index[1])
-                    Setup.grasp_object(pixel_index[2], pixel_index[1] + 90, (int)(angle / 3.14 * 180.0) + 90, is_right)
+                    Setup.grasp_object(pixel_index[2], pixel_index[1], (int)(angle / 3.14 * 180.0) + 90, is_right)
 
                     # '''
                     # make sure action success

@@ -24,9 +24,9 @@ class clip_image:
     def rgb_callback(self, data):
         cv_image = self.cv_bridge.imgmsg_to_cv2(data, "bgr8")
 
-        ## clip rgb image
-        color_right_image = cv_image[90:410, :320, :]
-        color_left_image = cv_image[90:410, 320:, :]
+        ## clip rgb image to (224 * 224)
+        color_right_image = cv_image[128:352, 60:284, :]
+        color_left_image = cv_image[128:352, 340:564, :]
 
         self.color_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(color_left_image, "bgr8"))
         self.color_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(color_right_image, "bgr8"))
@@ -34,9 +34,9 @@ class clip_image:
     def depth_callback(self, data):
         cv_depth = self.cv_bridge.imgmsg_to_cv2(data, "16UC1")
 
-        ## clip depth image
-        d_left_image = cv_depth[90:410, :320]
-        d_right_image = cv_depth[90:410, 320:]
+        ## clip depth image (224 * 224)
+        d_left_image = cv_depth[128:352, 60:284]
+        d_right_image = cv_depth[128:352, 340:564]
 
         self.depth_pub_r.publish(self.cv_bridge.cv2_to_imgmsg(d_left_image, "16UC1"))
         self.depth_pub_l.publish(self.cv_bridge.cv2_to_imgmsg(d_right_image, "16UC1"))
