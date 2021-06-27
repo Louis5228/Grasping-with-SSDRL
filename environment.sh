@@ -2,8 +2,6 @@
 
 HOME=/home/dlp
 
-export ROS_MASTER_URI=http://140.113.148.82:11311
-
 if [ "$1" ]; then
     echo "ROS IP $1"
     export ROS_IP=$1
