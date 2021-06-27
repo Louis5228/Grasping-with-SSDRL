@@ -58,7 +58,7 @@ class Trainer():
             for f in files:
                 if "behavior" in f:
                     self.behavior_net.load_state_dict(torch.load(os.path.join(artifact_dir, f)))
-                    self.target_net.load_state_dict(torch.load(self.behavior_net.state_dict())))
+                    self.target_net.load_state_dict(torch.load(self.behavior_net.state_dict()))
 
     def preprocessing(self, color, depth):
         # Zoom 2 times

@@ -18,6 +18,7 @@ class Option():
         parser.add_argument("--densenet_lr", type=float, default=1e-4, help="Learning rate for the densenet block, default is 1e-4")
         parser.add_argument("--save_every", type=int, default=5, help="Every how many update should save the model, default is 5")
         parser.add_argument("--gripper_memory", type=str, default="")
+        parser.add_argument("--record", action="store_true", default=False, help="collect data for replay buffer")
 
         # save name and load model path
         parser.add_argument("--save_folder", type=str, default=os.getcwd(), help="save model in save folder, default is current path")

@@ -352,64 +352,64 @@ if __name__ == '__main__':
                     wandb.log({"reward": result})
                     wandb.log({"loss mean": np.mean(loss_list)})
 
-                ################################TRAIN################################
-                # Start training after buffer has sufficient experiences
-                if gripper_memory_buffer.length   > args.mini_batch_size:
-                    sufficient_exp+=1
-                    if (sufficient_exp-1) % args.learning_freq == 0:
-                        back_ts = time.time()
-                        learned_times += 1
-                        mini_batch = []
-                        idxs = []
-                        is_weight = []
-                        old_q = []
-                        td_target_list = []
-                        
-                        _mini_batch, _idxs, _is_weight = sample_data(gripper_memory_buffer, args.mini_batch_size)
-                        mini_batch += _mini_batch
-                        idxs += _idxs
-                        is_weight += list(_is_weight)
-                        
-                        for i in range(len(mini_batch)):
-                            color = cv2.imread(mini_batch[i].color)
-                            depth = np.load(mini_batch[i].depth)
-                            pixel_index = mini_batch[i].pixel_idx
-                            next_color = cv2.imread(mini_batch[i].next_color)
-                            next_depth = np.load(mini_batch[i].next_depth)
+                if not args.record:
+                    ################################TRAIN################################
+                    # Start training after buffer has sufficient experiences
+                    if gripper_memory_buffer.length   > args.mini_batch_size:
+                        sufficient_exp+=1
+                        if (sufficient_exp-1) % args.learning_freq == 0:
+                            back_ts = time.time()
+                            learned_times += 1
+                            mini_batch = []
+                            idxs = []
+                            is_weight = []
+                            old_q = []
+                            td_target_list = []
+                            
+                            _mini_batch, _idxs, _is_weight = sample_data(gripper_memory_buffer, args.mini_batch_size)
+                            mini_batch += _mini_batch
+                            idxs += _idxs
+                            is_weight += list(_is_weight)
+                            
+                            for i in range(len(mini_batch)):
+                                color = cv2.imread(mini_batch[i].color)
+                                depth = np.load(mini_batch[i].depth)
+                                pixel_index = mini_batch[i].pixel_idx
+                                next_color = cv2.imread(mini_batch[i].next_color)
+                                next_depth = np.load(mini_batch[i].next_depth)
 
-                            rotate_idx = pixel_index[0]
-                            old_q.append(trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]])
-                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
-                            td_target_list.append(td_target)
-                            loss_ = trainer.backprop(color, depth, pixel_index, td_target, is_weight[i], args.mini_batch_size, i==0, i==len(mini_batch)-1)
-                            loss_list.append(loss_)
+                                rotate_idx = pixel_index[0]
+                                old_q.append(trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]])
+                                td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
+                                td_target_list.append(td_target)
+                                loss_ = trainer.backprop(color, depth, pixel_index, td_target, is_weight[i], args.mini_batch_size, i==0, i==len(mini_batch)-1)
+                                loss_list.append(loss_)
 
-                        # After parameter updated, update prioirites tree
-                        for i in range(len(mini_batch)):
+                            # After parameter updated, update prioirites tree
+                            for i in range(len(mini_batch)):
 
-                            color = cv2.imread(mini_batch[i].color)
-                            depth = np.load(mini_batch[i].depth)
-                            pixel_index = mini_batch[i].pixel_idx
-                            next_color = cv2.imread(mini_batch[i].next_color)
-                            next_depth = np.load(mini_batch[i].next_depth)
-                            td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
-                            rotate_idx = pixel_index[0]
-                            old_value = trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]]
+                                color = cv2.imread(mini_batch[i].color)
+                                depth = np.load(mini_batch[i].depth)
+                                pixel_index = mini_batch[i].pixel_idx
+                                next_color = cv2.imread(mini_batch[i].next_color)
+                                next_depth = np.load(mini_batch[i].next_depth)
+                                td_target = trainer.get_label_value(mini_batch[i].reward, next_color, next_depth, mini_batch[i].is_empty)
+                                rotate_idx = pixel_index[0]
+                                old_value = trainer.forward(color, depth, False, rotate_idx, clear_grad=True)[0, pixel_index[1], pixel_index[2]]
 
-                            print("New Q value: {:03f} -> {:03f} | TD Target: {:03f}".format(old_q[i], old_value, td_target_list[i]))
-                            print("========================================================================================")
+                                print("New Q value: {:03f} -> {:03f} | TD Target: {:03f}".format(old_q[i], old_value, td_target_list[i]))
+                                print("========================================================================================")
 
-                            gripper_memory_buffer.update(idxs[i], td_target-old_value)
+                                gripper_memory_buffer.update(idxs[i], td_target-old_value)
 
-                        back_t = time.time()-back_ts
+                            back_t = time.time()-back_ts
 
-                        print("Backpropagation& Updating: {} seconds \t|\t Avg. {} seconds".format(back_t, back_t/(args.mini_batch_size)))
+                            print("Backpropagation& Updating: {} seconds \t|\t Avg. {} seconds".format(back_t, back_t/(args.mini_batch_size)))
 
-                        if learned_times % args.updating_freq == 0:
-                            print("[%f] Replace target network to behavior network" %(program_time+time.time()-program_ts))
-                            trainer.target_net.load_state_dict(trainer.behavior_net.state_dict())
-                        if learned_times % args.save_every == 0:
-                            model_name = model_path + "behavior_e{}_i{}.pth".format(episode, iteration)
-                            torch.save(trainer.behavior_net.state_dict(), model_name)
-                            print("[%f] Model: %s saved" %(program_time+time.time()-program_ts, model_name))
-
+                            if learned_times % args.updating_freq == 0:
+                                print("[%f] Replace target network to behavior network" %(program_time+time.time()-program_ts))
+                                trainer.target_net.load_state_dict(trainer.behavior_net.state_dict())
+                            if learned_times % args.save_every == 0:
+                                model_name = model_path + "behavior_e{}_i{}.pth".format(episode, iteration)
+                                torch.save(trainer.behavior_net.state_dict(), model_name)
+                                print("[%f] Model: %s saved" %(program_time+time.time()-program_ts, model_name))
