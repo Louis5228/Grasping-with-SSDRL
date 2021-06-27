@@ -10,6 +10,9 @@ import wandb
 from trainer import Trainer
 from utils.prioritized_memory import Memory
 
+# Define transition tuple
+Transition = namedtuple('Transition', ['color', 'depth', 'pixel_idx', 'reward', 'next_color', 'next_depth', 'is_empty'])
+
 class Option():
     def __init__(self):
         parser = argparse.ArgumentParser(prog="DLP final project", description='This program for offline learning')
