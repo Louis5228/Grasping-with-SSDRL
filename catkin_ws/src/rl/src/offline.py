@@ -6,6 +6,7 @@ import cv2
 import torch
 import argparse
 import wandb
+from collections import namedtuple
 
 from trainer import Trainer
 from utils.prioritized_memory import Memory
@@ -56,8 +57,7 @@ def sample_data(memory, batch_size):
 
 class Offline_training():
     def __init__(self, args):
-
-        self.gripper_sampled = np.zeros(args.memory_size)
+        
         self.gripper_memory = Memory(args.memory_size)
         self.gripper_memory.load_memory(args.gripper_memory)
 
@@ -94,8 +94,6 @@ class Offline_training():
             mini_batch += _mini_batch
             idxs += _idxs
             is_weight += list(_is_weight)
-            tmp = [idx-arg.memory_size-1 for idx in _idxs]
-            gripper_sampled[tmp] += 1
 
             for j in range(len(mini_batch)):
                 color = cv2.imread(mini_batch[j].color)
@@ -125,20 +123,14 @@ class Offline_training():
 
             if (i+1) % args.save_freq == 0:
 
-                torch.save(self.trainer.behavior_net.state_dict(), os.path.join(self.weight, "behavior_{}.pth".format(i+1))
-
-                color = cv2.imread(compare_color)
-                depth = np.load(compare_depth)
-                grasp_prediction = trainer.forward(color, depth, is_volatile=True)
-
-                np.savetxt(args.save_folder + "/gripper_sampled.csv", self.gripper_sampled, delimiter=",")
+                torch.save(self.trainer.behavior_net.state_dict(), os.path.join(self.weight, "behavior_{}.pth".format(i+1)))
 
             if (i+1) % args.updating_freq == 0:
                 self.trainer.target_net.load_state_dict(trainer.behavior_net.state_dict())
 
             if (i+1) == args.iteration:
                 artifact = wandb.Artifact('model', type='model')
-                artifact.add_file(os.path.join(os.path.join(self.weight, "behavior_{}.pth".format(i+1))
+                artifact.add_file(os.path.join(os.path.join(self.weight, "behavior_{}.pth".format(i+1))))
                 self.run.log_artifact(artifact)
                 self.run.join()
 

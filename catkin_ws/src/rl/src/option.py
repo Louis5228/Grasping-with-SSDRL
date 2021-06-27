@@ -19,6 +19,7 @@ class Option():
         parser.add_argument("--save_every", type=int, default=5, help="Every how many update should save the model, default is 5")
         parser.add_argument("--gripper_memory", type=str, default="")
         parser.add_argument("--record", action="store_true", default=False, help="collect data for replay buffer")
+        parser.add_argument("--size_lim", type=int, default=20, help="The times of collect data")
 
         # save name and load model path
         parser.add_argument("--save_folder", type=str, default=os.getcwd(), help="save model in save folder, default is current path")

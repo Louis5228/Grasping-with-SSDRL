@@ -116,7 +116,7 @@ class setup():
 
         rospy.loginfo("Finish placeing")
 
-def shutdown_process(gri_mem, regular=True):
+def shutdown_process(path, gri_mem, regular=True):
 
     gri_mem.save_memory(path, "gripper_memory.pkl")
     if regular: print("Regular shutdown")
@@ -197,7 +197,7 @@ if __name__ == '__main__':
             workspace = [420, 520, 120, 350]
 
         if cmd == 'E' or cmd == 'e': # End
-            shutdown_process(package_path, gripper_memory_buffer, True)
+            shutdown_process(log_path, gripper_memory_buffer, True)
             cv2.destroyWindow("prediction")
 
         elif cmd == 'S' or cmd == 's': # Start
@@ -260,8 +260,8 @@ if __name__ == '__main__':
 
                 # Save (color heightmap + prediction heatmap + motion primitive and corresponding position), then show it
                 visual_img = log.draw_image(mixed_imgs, pixel_index, iteration, explore)
-                cv2.imshow("prediction", cv2.resize(visual_img, None, fx=2, fy=2))
-                cv2.waitKey(0)
+                # cv2.imshow("prediction", cv2.resize(visual_img, None, fx=2, fy=2))
+                # cv2.waitKey(0)
 
                 # Check if action valid (is NAN?)
                 is_valid = utils.check_if_valid(pixel_index[1:3], workspace, is_right)
@@ -351,6 +351,9 @@ if __name__ == '__main__':
                     is_right = False
                     wandb.log({"reward": result})
                     wandb.log({"loss mean": np.mean(loss_list)})
+
+                if iteration == args.size_lim:
+                    is_empty = True
 
                 if not args.record:
                     ################################TRAIN################################

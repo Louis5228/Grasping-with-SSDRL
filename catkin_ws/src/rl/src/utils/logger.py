@@ -41,7 +41,7 @@ class Logger():
             os.makedirs(self.action)
 
     def get_path(self):
-        return self.pic_path, self.color, self.depth
+        return self.log_path, self.color, self.depth
 
     def vis_affordance(self, prediction):
         tmp = np.copy(prediction)
