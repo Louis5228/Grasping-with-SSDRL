@@ -58,7 +58,7 @@ class uv2xyz():
         return res
         
     def motion(self, req):
-        q = tf.transformations.quaternion_from_euler(angle2radius(-90.0), angle2radius(90.0), angle2radius(req.angle), axes="rxzx")
+        q = tf.transformations.quaternion_from_euler(self.angle2radius(-90.0), self.angle2radius(90.0), self.angle2radius(req.angle), axes="rxzx")
 
         self.mani_req.target_pose.position.x = req.x
         self.mani_req.target_pose.position.y = req.y
@@ -73,7 +73,7 @@ class uv2xyz():
         try:
             mani_resp = self.mani_move_srv(self.mani_req)
             rospy.sleep(0.1)
-            self.mani_req.target_pose.position.z = pose[2] - 0.02
+            self.mani_req.target_pose.position.z = req.z - 0.02
             mani_resp = self.mani_move_srv(self.mani_req)
             res.result = "success"
         except (rospy.ServiceException, rospy.ROSException) as e:
