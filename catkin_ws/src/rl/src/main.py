@@ -194,9 +194,9 @@ if __name__ == '__main__':
         workspace in right and left tote
         '''
         if is_right:
-            workspace = [120, 220, 100, 350]
+            workspace = [120, 220, 130, 340]
         else:
-            workspace = [420, 520, 100, 350]
+            workspace = [400, 500, 130, 340]
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(log_path, gripper_memory_buffer, True)

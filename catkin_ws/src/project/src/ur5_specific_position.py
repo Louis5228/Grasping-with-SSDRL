@@ -67,7 +67,7 @@ class endeffector_move():
         self.mani_ee_srv = '/ur5_control_server/ur_control/goto_pose'
         self.mani_move_srv = rospy.ServiceProxy(self.mani_ee_srv, target_pose)
         self.mani_req = target_poseRequest()
-        self.factor = 0.5
+        self.factor = 0.75
 
     def goto_pose(self, req):
         self.mani_req.target_pose.position.x = req.target_pose.position.x

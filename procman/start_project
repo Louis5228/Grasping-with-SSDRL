@@ -3,6 +3,18 @@ group "00_calibration" {
         exec = "roslaunch realsense2_camera rs_rgbd.launch";
         host = "localhost";
     }
+    cmd "02_ur5_real" {
+        exec = "roslaunch arm_operation ur5_real.launch robot_ip:=192.168.50.11 tool_length:=0.0";
+        host = "localhost";
+    }
+    cmd "03_apriltag" {
+        exec = "roslaunch hand_eye_calibration cali_cam1.launch";
+        host = "localhost";
+    }
+    cmd "04_fake_tcp_publisher" {
+        exec = "roslaunch hand_eye_calibration fake_tcp_publisher.launch";
+        host = "localhost";
+    }
 }
 
 group "01_DLP_project" {   

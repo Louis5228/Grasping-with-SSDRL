@@ -6,11 +6,12 @@
     </include>
 
      <!--Hand-eye callibration-->
-    <node pkg="tf" type="static_transform_publisher" name="arm_d435_static_transform" args="0.422134 0.034468 0.650901 0.718939 -0.001258 -0.695070 0.001770 base_link camera_link 100"/>
+    <node pkg="tf" type="static_transform_publisher" name="arm_d435_static_transform" args="0.452245 0.046200 0.641197 -0.704259 -0.002307 0.709669 -0.019618 base_link camera_link 100"/>
     
     <!--Ur5-->
     <include file="$(find arm_operation)/launch/ur5_real.launch">
             <arg name="robot_ip" default="192.168.50.11" />
+            <arg name="tool_length" default="0.15"/>
     </include>
     
     <!--Gripper-->
