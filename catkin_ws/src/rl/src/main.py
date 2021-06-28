@@ -39,6 +39,7 @@ class setup():
         self.go_right_tote = rospy.ServiceProxy("/joint_move/right_tote", Trigger)
         self.go_left_tote = rospy.ServiceProxy("/joint_move/left_tote", Trigger)
         self.uvtrans = rospy.ServiceProxy("/uv2xyz", uvTransform)
+        self.xyz2motion = rospy.ServiceProxy("/xyz2motion", motion)
 
         # rosservice for gripper
         self.close = rospy.ServiceProxy("/robotiq_finger_control_node/close_gripper", Empty)
@@ -77,9 +78,21 @@ class setup():
         else :
             req_trans.u = u + 340
         req_trans.v = v + 128    
-        req_trans.angle = angle
 
-        _ = self.uvtrans(req_trans)
+        # get x, y, z
+        res = self.uvtrans(req_trans)
+
+        req = TriggerRequest()
+        _ = self.go_right_tote(req) if is_right else self.go_left_tote(req)
+
+        rospy.sleep(0.2)
+
+        req = motionRequest()
+        req.x = res.x
+        req.y = res.y
+        req.z = res.z
+        req.angle = angle
+        _ = self.xyz2motion(req)
 
         rospy.sleep(0.2)
 
