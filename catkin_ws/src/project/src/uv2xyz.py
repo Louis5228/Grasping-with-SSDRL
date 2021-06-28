@@ -22,6 +22,7 @@ class uv2xyz():
 
         ## ROS service
         rospy.Service("/uv2xyz", uvTransform, self.uvTransform)
+        rospy.Service("/xyz2motion", motion, self.motion)
         ## ROS client
         self.mani_ee_srv = '/ee_target_pose'
         self.mani_move_srv = rospy.ServiceProxy(self.mani_ee_srv, ee_move)
@@ -30,6 +31,7 @@ class uv2xyz():
         ## for opencv
         self.cv_bridge = CvBridge()
 
+        ## for tf
         self.listener = tf.TransformListener()
 
     def uvTransform(self, req):
@@ -42,33 +44,42 @@ class uv2xyz():
         zc = float(zc)/1000. # 1000. for D435
         rx, ry, rz = self.getXYZ(req.u/1.0 , req.v/1.0, zc/1.0)
 
-        q = tf.transformations.quaternion_from_euler( -90.0 * math.pi/180, 90.0 * math.pi/180, req.angle * math.pi/180, axes="rxzx")
-
         t = [rx, ry, rz]
-        # print(t)
-        pose = self.transform_pose_to_base_link(t, q)
-        # print(pose)
+        q = [0, 0, 0, 1]
 
-        self.mani_req.target_pose.position.x = pose[0]
-        self.mani_req.target_pose.position.y = pose[1]
-        self.mani_req.target_pose.position.z = pose[2] + 0.2
+        pose = self.transform_pose_to_base_link(t, q)
+        print("GRASP POSE : ", pose)
+
+        res = uvTransformResponse()
+        res.x = pose[0]
+        res.y = pose[1]
+        res.z = pose[2]
+
+        return res
+        
+    def motion(self, req):
+        q = tf.transformations.quaternion_from_euler(angle2radius(-90.0), angle2radius(90.0), angle2radius(req.angle), axes="rxzx")
+
+        self.mani_req.target_pose.position.x = req.x
+        self.mani_req.target_pose.position.y = req.y
+        self.mani_req.target_pose.position.z = req.z + 0.2
         self.mani_req.target_pose.orientation.x = q[0]
         self.mani_req.target_pose.orientation.y = q[1]
         self.mani_req.target_pose.orientation.z = q[2]
         self.mani_req.target_pose.orientation.w = q[3]
 
-        res = uvTransformResponse()
+        res = motionResponse()
 
         try:
             mani_resp = self.mani_move_srv(self.mani_req)
             rospy.sleep(0.1)
-            self.mani_req.target_pose.position.z = pose[2] - 0.05
+            self.mani_req.target_pose.position.z = pose[2] - 0.02
             mani_resp = self.mani_move_srv(self.mani_req)
             res.result = "success"
         except (rospy.ServiceException, rospy.ROSException) as e:
             res.result = "fail"
             print("Service call failed: %s"%e)
-            
+
         return res
 
     def getXYZ(self, x, y, zc):
@@ -91,7 +102,7 @@ class uv2xyz():
         t_ba_li = t_pose[0:3, 3]
         return t_ba_li
 
-    def angle2radius(self, angele):
+    def angle2radius(self, angle):
         radius = angle * math.pi/180.0
         return radius
 

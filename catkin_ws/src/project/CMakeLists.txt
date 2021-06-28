@@ -61,6 +61,7 @@ add_service_files(
   FILES
   uvTransform.srv
   ee_move.srv
+  motion.srv
 )
 
 ## Generate actions in the 'action' folder

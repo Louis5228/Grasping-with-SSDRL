@@ -1,5 +1,6 @@
 int32 u
 int32 v
-int32 angle
 ---
-string result
+int32 x
+int32 y
+int32 z
