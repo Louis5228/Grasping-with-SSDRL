@@ -62,7 +62,7 @@ class uv2xyz():
 
         self.mani_req.target_pose.position.x = req.x
         self.mani_req.target_pose.position.y = req.y
-        self.mani_req.target_pose.position.z = req.z + 0.2
+        self.mani_req.target_pose.position.z = req.z + 0.1
         self.mani_req.target_pose.orientation.x = q[0]
         self.mani_req.target_pose.orientation.y = q[1]
         self.mani_req.target_pose.orientation.z = q[2]
@@ -70,15 +70,14 @@ class uv2xyz():
 
         res = motionResponse()
 
-        try:
+        if req.z <= 0.4:
             mani_resp = self.mani_move_srv(self.mani_req)
             rospy.sleep(0.1)
-            self.mani_req.target_pose.position.z = req.z - 0.02
+            self.mani_req.target_pose.position.z = req.z - 0.045
             mani_resp = self.mani_move_srv(self.mani_req)
             res.result = "success"
-        except (rospy.ServiceException, rospy.ROSException) as e:
+        else:
             res.result = "fail"
-            print("Service call failed: %s"%e)
 
         return res
 
