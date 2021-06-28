@@ -48,15 +48,6 @@ class setup():
 
         self.initial()
 
-        # self.grasp_object(200, 200, 45, True)
-
-        # if self.check_grasped():
-        #     print("grasped object")
-        # else:
-        #     print("trash")
-
-        # self.place_object(True)
-
     def initial(self):
 
         req = TriggerRequest()
@@ -213,7 +204,6 @@ if __name__ == '__main__':
 
         if cmd == 'E' or cmd == 'e': # End
             shutdown_process(log_path, gripper_memory_buffer, True)
-            # cv2.destroyWindow("prediction")
 
         elif cmd == 'S' or cmd == 's': # Start
 
@@ -243,10 +233,6 @@ if __name__ == '__main__':
                 depth = cv_bridge.imgmsg_to_cv2(depth, "16UC1")
 
                 depth = np.array(depth) / 1000.0
-                # cv2.imshow("depth_img.png", depth_array)
-                # cv2.imshow("color.png",color)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
 
                 grasp_prediction = trainer.forward(color, depth, is_volatile=True)
                 print("Forward past: {} seconds".format(time.time()-ts))
@@ -268,21 +254,12 @@ if __name__ == '__main__':
                 '''
                 transform real x,y,z with u,v
                 '''
-                #real_x, real_y, real_z 
-
-                # utils.print_action(action_str, pixel_index, points[pixel_index[1], pixel_index[2]])
-                # print("Take action primitive {} with angle {%d} at ({%d}, {%d}) -> ({%d}, {%d}, {%d})".format(action, angle, pixel_index[1], pixel_index[2], real_x, real_y, real_z ))
 
                 # Save (color heightmap + prediction heatmap + motion primitive and corresponding position), then show it
                 visual_img = log.draw_image(mixed_imgs, pixel_index, iteration, explore)
-                # cv2.imshow("prediction", cv2.resize(visual_img, None, fx=2, fy=2))
-                # cv2.waitKey(0)
 
                 # Check if action valid (is NAN?)
                 is_valid = utils.check_if_valid(pixel_index[1:3], workspace, is_right)
-
-                # Visualize in RViz
-                # _viz(points[pixel_index[1], pixel_index[2]], action, angle, is_valid)
 
                 # will_collide = None
                 if is_valid: # Only take action if valid
@@ -334,9 +311,9 @@ if __name__ == '__main__':
                 
                 # check the tote empty?
                 if(objects == 0):
-                    is_empty == True
+                    is_empty = True
                 else:
-                    is_empty == False
+                    is_empty = False
 
                 current_reward = utils.reward_judgement(5, is_valid, action_success)
 
@@ -361,13 +338,9 @@ if __name__ == '__main__':
                 iteration += 1
 
                 if(is_empty == True):
-                    is_right = False
+                    is_right = not is_right
                     wandb.log({"reward": result})
                     wandb.log({"loss mean": np.mean(loss_list)})
-
-                if iteration == args.size_lim:
-                    is_empty = True
-                    shutdown_process(log_path, gripper_memory_buffer, True)
 
                 if not args.record:
                     ################################TRAIN################################
