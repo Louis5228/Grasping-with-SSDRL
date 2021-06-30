@@ -32,3 +32,9 @@ teacher : 陳永昇、吳毅成、彭文孝
     $ cd Docker && source docker_join.sh
     Docker $ cd Grasping-with-SSDRL && source environment.sh
 ```
+
+## Online learning
+```
+     $ roslaunch project ur5.launch
+     $ rosrun rl main.py
+```
