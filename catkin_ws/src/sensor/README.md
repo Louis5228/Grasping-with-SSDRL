@@ -6,3 +6,4 @@ These packages including:
 - apriltags
 - realsense-ros for librealsense 2.36.0
 - vision_opencv 
+- geometry2
