@@ -3,7 +3,7 @@
 import rospy
 from arm_operation.srv import *
 from arm_operation.msg import *
-from project.srv import *
+from arm_bringup.srv import *
 from std_srvs.srv import Trigger, TriggerResponse
 
 class joint_move():

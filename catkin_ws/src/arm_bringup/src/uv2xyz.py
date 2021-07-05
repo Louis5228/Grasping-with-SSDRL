@@ -8,7 +8,7 @@ import numpy as np
 import tf.transformations as tfm
 from sensor_msgs.msg import CameraInfo, Image
 from cv_bridge import CvBridge
-from project.srv import *
+from arm_bringup.srv import *
 
 class uv2xyz():
     def __init__(self):
