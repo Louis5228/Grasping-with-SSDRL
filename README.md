@@ -35,6 +35,6 @@ teacher : 陳永昇、吳毅成、彭文孝
 
 ## Online learning
 ```
-     $ roslaunch project ur5.launch
-     $ rosrun rl main.py
+     $ roslaunch arm_bringup ur5.launch
+     $ rosrun algorithm main.py
 ```
