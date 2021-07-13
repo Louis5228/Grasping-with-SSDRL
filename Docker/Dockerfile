@@ -64,6 +64,7 @@ RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -yq dist-upgrade \
     screen \
     openssh-server \
     libglfw3-dev \
+    iputils-ping \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -182,7 +183,8 @@ RUN pip3 install \
     lmdb \  
     shapely \
     wandb \
-    virtualenv 
+    virtualenv \
+    pytest
     
 ##################################### Pytorch ######################################
 
