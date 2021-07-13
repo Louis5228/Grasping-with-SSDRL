@@ -38,4 +38,4 @@ jobs:
       - run:
           name: Run docker
           # This assumes pytest is installed via the install-package step above
-          command: source Docker/docker_run.sh
+          command: ./Docker/docker_run.sh
