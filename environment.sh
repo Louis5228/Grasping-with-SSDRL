@@ -16,7 +16,7 @@ else
     export ROS_IP=127.0.0.1
 fi
 
-source /opt/ros/melodic/setup.bash
+source /opt/ros/noetic/setup.bash
 source ./catkin_ws/devel/setup.bash
 
 echo "DLP project environment"

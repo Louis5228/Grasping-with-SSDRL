@@ -1,9 +1,9 @@
-FROM nvidia/cuda:10.1-cudnn7-runtime-ubuntu18.04
+FROM nvidia/cuda:11.2.0-cudnn8-runtime-ubuntu20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
-ENV ROS_DISTRO melodic
+ENV ROS_DISTRO noetic
 
 ###################################### user #####################################
 
@@ -46,12 +46,6 @@ RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -yq dist-upgrade \
     libcanberra-gtk-module \
     libcanberra-gtk3-module \
     libpcap-dev \
-    python-gtk2 \
-    python-gobject \
-    python-tk \
-    python-lxml \
-    python-pymodbus \
-    python-pip \
     python3-pip \
     python3-setuptools \
     python3-opencv \
@@ -60,7 +54,6 @@ RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -yq dist-upgrade \
     python3-lxml \
     python3-pymodbus \
     terminator \
-    python-virtualenv \
     screen \
     openssh-server \
     libglfw3-dev \
@@ -77,11 +70,9 @@ RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E
 # install bootstrap tools
 RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -o Acquire::ForceIPv4=true install --no-install-recommends -y \
     ros-$ROS_DISTRO-desktop-full \
-    ros-$ROS_DISTRO-serial \
     ros-$ROS_DISTRO-soem \
     ros-$ROS_DISTRO-openslam-gmapping \
     ros-$ROS_DISTRO-geodesy \
-    ros-$ROS_DISTRO-cartographer-* \
     ros-$ROS_DISTRO-ddynamic-reconfigure \
     ros-$ROS_DISTRO-perception \
     ros-$ROS_DISTRO-rgbd-launch \
@@ -114,23 +105,17 @@ RUN apt-get -o Acquire::ForceIPv4=true update && apt-get -o Acquire::ForceIPv4=t
     ros-$ROS_DISTRO-force-torque-sensor-controller \
     ros-$ROS_DISTRO-industrial-msgs \
     ros-$ROS_DISTRO-effort-controllers \
-    ros-$ROS_DISTRO-dynamixel-workbench-toolbox \
-    ros-$ROS_DISTRO-smach \
-    ros-$ROS_DISTRO-smach-msgs \
-    ros-$ROS_DISTRO-smach-ros \
-    ros-$ROS_DISTRO-executive-smach \
-    ros-$ROS_DISTRO-smach-viewer \
-    python-rosdep \
-    python-rosinstall \
-    python-rosinstall-generator \
-    python-wstool \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rosdep init \
     && rosdep update
 
 ##################################### Serial ######################################
-ENV CMAKE_PREFIX_PATH /opt/ros/melodic
+ENV CMAKE_PREFIX_PATH /opt/ros/noetic
 
 RUN cd ${HOME} && git clone https://github.com/wjwwood/serial.git \
     && cd serial \
@@ -191,7 +176,7 @@ RUN pip3 install \
 RUN python3 -m pip install -U pip 
 
 RUN python3 -m pip install \
-    torch==1.7.0 torchvision==0.8.1 torchaudio==0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
+    torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 ####################################### procman ###########################################
 
@@ -209,10 +194,22 @@ RUN cd ${HOME} && git clone https://github.com/ARG-NCTU/procman \
     && cmake .. \
     && make install
 
+############################# custom gazebo ###############################
+
+RUN mkdir -p $HOME/.gazebo \
+    && cd $HOME/.gazebo \
+    && git clone https://github.com/osrf/gazebo_models \
+    && mv gazebo_models models \
+    && cd
+
 ##################################### setting #####################################
 
 RUN chown -R ${USER}:${USER} ${HOME}/
 RUN echo "dlp ALL=(ALL)  ALL" > /etc/sudoers
+
+RUN echo "source /opt/ros/noetic/setup.bash" >> ${HOME}/.bashrc
+
+RUN echo "cd Grasping-with-SSDRL/" >> ${HOME}/.bashrc
 
 # Support of nvidia-docker 2.0
 ENV NVIDIA_VISIBLE_DEVICES=all
