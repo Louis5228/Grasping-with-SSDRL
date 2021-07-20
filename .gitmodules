@@ -16,3 +16,6 @@
 [submodule "catkin_ws/src/sensor/vision_opencv"]
 	path = catkin_ws/src/sensor/vision_opencv
 	url = git@github.com:ros-perception/vision_opencv.git
+[submodule "catkin_ws/src/ur5/robotiq"]
+	path = catkin_ws/src/ur5/robotiq
+	url = git@github.com:kuolunwang/robotiq.git

@@ -25,7 +25,7 @@ from collections import namedtuple
 from sensor_msgs.msg import Image
 from arm_operation.srv import *
 from arm_operation.msg import *
-from project.srv import *
+from arm_bringup.srv import *
 from std_srvs.srv import Trigger, TriggerResponse, TriggerRequest, Empty
 
 # Define transition tuple
@@ -310,7 +310,7 @@ if __name__ == '__main__':
                 next_depth = np.array(next_depth) / 1000.0
                 
                 # check the tote empty?
-                if(objects == 0):
+                if(objects == 0 or args.size_lim == iteration - 1):
                     is_empty = True
                 else:
                     is_empty = False
