@@ -13,7 +13,7 @@ jobs:
       - checkout
       - run:
           name: cake make
-          command:
+          command: |
             git submodule update --init --recursive
             source /opt/ros/noetic/setup.bash 
             source catkin_make.sh
