@@ -14,5 +14,6 @@ jobs:
       - run:
           name: cake make
           command:
-            source /opt/ros/melodic/setup.bash 
-            ./catkin_make.sh
+            git submodule update --init --recursive
+            source /opt/ros/noetic/setup.bash 
+            source catkin_make.sh
