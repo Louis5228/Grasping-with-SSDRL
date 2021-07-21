@@ -1,5 +1,7 @@
 # Learning Grasping with Self-Supervised Deep Reinforcement Learning
 
+[![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=svg)](https://circleci.com/gh/kuolunwang/Grasping-with-SSDRL)
+
 This repo is final project for 2021 Deep Learning and Practice class
 
 teacher : 陳永昇、吳毅成、彭文孝
